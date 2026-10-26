@@ -19,6 +19,10 @@ DBFiles/*
 # Environment variables
 .env
 
+# ERD Diagrams
+*.erd.json
+*.drawios
+
 # OS Temporary Files
 *.temp
 *.tmp
