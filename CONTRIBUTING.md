@@ -30,7 +30,7 @@ We strictly follow **PEP 8**. We use automated tools to enforce consistency:
   ruff format --check .
 
 
-### 2.3 Docstrings & Type Annotations
+### 2.2 Docstrings & Type Annotations
 Include explicit type annotations for all function arguments and return values.
 Document all public modules, classes, and functions using Google Style Docstrings:
 def borrow_book(member_id: int, book_id: int) -> bool:
