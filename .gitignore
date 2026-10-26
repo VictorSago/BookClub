@@ -1,0 +1,25 @@
+
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# IDE specific
+.vscode/
+.idea/
+
+# Database shouldn't be uploaded to the remote
+DBFiles/*
+*.db
+!.keep_folder
+
+# Environment variables
+.env
+
+# OS Temporary Files
+*.temp
+*.tmp
+ 
