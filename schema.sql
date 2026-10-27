@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS books (
     CHECK (
         first_publish_year IS NULL
         OR (typeof(first_publish_year) = 'integer' 
-            AND first_publish_year BETWEEN -3000 AND 3000)
+            AND first_publish_year BETWEEN 1400 AND 2200)
     ),
     CHECK (isbn IS NULL OR length(isbn) IN (10, 13))   -- store without hyphens
 );
