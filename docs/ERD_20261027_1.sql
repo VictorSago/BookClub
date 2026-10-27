@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS members (
   email TEXT NOT NULL UNIQUE COLLATE NOCASE,
   phone TEXT NULL,
   joined_at TEXT NOT NULL DEFAULT (datetime('now')),
-  anonymised_at TEXT NULL DEFAULT (datetime('now'))
+  anonymised_at TEXT NULL DEFAULT NULL
 );
 
 -- A book is out when it has a loan with return_date IS NULL.

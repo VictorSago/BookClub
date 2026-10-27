@@ -223,7 +223,7 @@
         "tableId": "03h4deyc0vrmvno7rfx9zoiff",
         "name": "anonymised_at",
         "dataType": "TEXT",
-        "default": "datetime('now')",
+        "default": "NULL",
         "options": 0
       },
       "03h4iyojihrtmw7tbk9qbenn3": {
