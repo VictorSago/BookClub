@@ -52,8 +52,12 @@ CREATE TABLE IF NOT EXISTS loans (
     return_date TEXT,
     FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE RESTRICT,
     FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE RESTRICT,
-    CHECK (due_date >= loan_date),
-    CHECK (return_date IS NULL OR return_date >= loan_date)
+    CHECK (datetime(loan_date) IS NOT NULL),
+    CHECK (datetime(due_date) IS NOT NULL 
+        AND datetime(due_date) >= datetime(loan_date)), 
+    CHECK (return_date IS NULL 
+        OR (datetime(return_date) IS NOT NULL 
+            AND datetime(return_date) >= datetime(loan_date)))
 );
 
 -- Prevent double borrowing of the same physical book.
