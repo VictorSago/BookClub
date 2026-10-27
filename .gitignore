@@ -1,5 +1,4 @@
 
-
 # Python
 __pycache__/
 *.py[cod]
@@ -12,16 +11,11 @@ venv/
 .idea/
 
 # Database shouldn't be uploaded to the remote
-DBFiles/*
 *.db
 !.keep_folder
 
 # Environment variables
 .env
-
-# ERD Diagrams
-*.erd.json
-*.drawios
 
 # OS Temporary Files
 *.temp
