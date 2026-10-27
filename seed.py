@@ -7,19 +7,15 @@ If library.db already exists, delete it first and run this script again.
 """
 
 import sys
+import secrets
 from pathlib import Path
 from datetime import date, datetime, timedelta
-import string
-import secrets
 import sqlite3
-from database import DB_PATH, connect
+from database import DB_PATH, connect, new_card_number
 
 
 BASE_DIR = Path(__file__).parent
 SCHEMA_PATH = BASE_DIR / "schema.sql"
-
-CARD_ALPHABET = string.ascii_uppercase + string.digits
-CARD_LENGTH = 16
 
 LOAN_DAYS = 21  # Keep in sync with the default loan length in the API.
 ANONYMISED_NAME = "Anonymised member"
@@ -50,37 +46,46 @@ BOOKS = [
     ("Life, the Universe and Everything", 1982, "0330267388", ["Douglas Adams"]),
     ("So Long, and Thanks for All the Fish", 1984, "0330287001", ["Douglas Adams"]),
     ("Mostly Harmless", 1992, "0330323113", ["Douglas Adams"]),
-    ("A Night in the Lonesome October", 1993, "0688125085", ["Roger Zelazny"]),
+    ("A Night in the Lonesome October", 1993, "0688125085", ["Roger Zelazny"])
 ]
 
-# (name, email, phone). All fake; example.com is reserved for examples.
+# (name, email, phone, card number, joined). All fake test data.
 MEMBERS = [
-    ("Alice Andersson", "alice@example.com", "070-000 00 01"),
-    ("Bo Berg", "bo@example.com", None),
-    ("Cecilia Carlsson", "cecilia@example.com", "070-000 00 03"),
-    ("David Dahl", "david@example.com", None),
-    ("Arthur Dent", "arthur@example.com", "070-000 00 05"),
-    ("Ford Prefect", "ford@example.com", None),
-    ("Zaphod Beeblebrox", "zaphod@example.com", None),
+    ("Alice Primary", "alice@example.com", "070-000 00 01", "DEMOCARD00000001", "2025-09-14"),
+    ("Bob Companion", "bob@example.com", None, "DEMOCARD00000002", "2025-11-03"),
+    ("Cecilia Tertison", "cecilia@example.com", "070-000 00 03", "DEMOCARD00000003", "2026-01-20"),
+    ("David Friendly", "david@example.com", None, "DEMOCARD00000004", "2026-03-08"),
+    ("Eve Mallory", "eve.m@example.com", None, "DEMOCARD00000005", "2026-03-08"),
+    ("Arthur Dent", "arthur@example.com", "070-000 00 05", "DEMOCARD00000006", "2026-04-02"),
+    ("Ford Prefect", "ford@example.com", None, "DEMOCARD00000007", "2026-05-17"),
+    ("Zaphod Beeblebrox", "zaphod@example.com", "070-000 00 07", "DEMOCARD00000008", "2026-06-09"),
+    ("Random Frequent Flyer Dent", "random.ffd@example.com", None, "DEMOCARD00000009", "2026-08-09")
 ]
 
 # (book title, member name, days since loan, days since return or None)
 # None means the book is still out. Dates are relative to today, so the
 # overdue loan stays overdue whenever the script is run.
 LOANS = [
-    ("The Hobbit", "Alice Andersson", 60, 45),
-    ("The Hobbit", "Bo Berg", 40, 25),
-    ("The Hobbit", "David Dahl", 10, None),
-    ("Good Omens", "Alice Andersson", 30, None),  # overdue
-    ("A Wizard of Earthsea", "Cecilia Carlsson", 5, None),
-    ("The Dispossessed", "Bo Berg", 20, 10),
+    ("The Hobbit", "Alice Primary", 60, 45),
+    ("Good Omens", "Alice Primary", 30, None),  # overdue
+    ("The Hobbit", "Bob Companion", 40, 25),
+    ("The Dispossessed", "Bob Companion", 20, 10),
+    ("The Dispossessed", "Cecilia Tertison", 70, 40),  # returned late
+    ("A Wizard of Earthsea", "Cecilia Tertison", 5, None),
+    ("Guards! Guards!", "David Friendly", 35, 28),
+    ("The Hobbit", "David Friendly", 10, None),
+    ("The Hitchhiker's Guide to the Galaxy", "Arthur Dent", 120, 105),
+    ("The Restaurant at the End of the Universe", "Arthur Dent", 100, 88),
+    ("Life, the Universe and Everything", "Arthur Dent", 85, 70),
+    ("Neverwhere", "Bob Companion", 25, None),  # overdue
+    ("The Hobbit", "Ford Prefect", 150, 135),
+    ("The Hitchhiker's Guide to the Galaxy", "Ford Prefect", 95, 80),
+    ("A Night in the Lonesome October", "Ford Prefect", 20, None),  # due tomorrow
+    ("Pippi Longstocking", "Random Frequent Flyer Dent", 66, 55),
+    ("The Hitchhiker's Guide to the Galaxy", "Random Frequent Flyer Dent", 50, 38),
+    ("A Wizard of Earthsea", "Random Frequent Flyer Dent", 30, 20),
     ("Guards! Guards!", ANONYMISED_NAME, 90, 80),
 ]
-
-
-def new_card_number() -> str:
-    """Return a random card number made of capital letters and digits."""
-    return "".join(secrets.choice(CARD_ALPHABET) for _ in range(CARD_LENGTH))
 
 
 def create_tables(conn: sqlite3.Connection) -> None:
@@ -120,20 +125,24 @@ def insert_books(
 
 def insert_member(
     conn: sqlite3.Connection, 
-    name: str, email: str, 
+    name: str, 
+    email: str, 
     phone: str | None, 
+    card_number: str, 
+    joined_at: str, 
+    *,
     anonymised_at: str | None = None
     ) -> tuple[int, str]:
-    """Insert one member with a random card number.
+    """Insert one member.
 
     Return the new member_id and the card number.
     """
-    card_number = new_card_number()
+    #card_number = new_card_number()
     cursor = conn.execute(
         "INSERT INTO members "
-        "(card_number, name, email, phone, anonymised_at) "
-        "VALUES (?, ?, ?, ?, ?)",
-        (card_number, name, email, phone, anonymised_at),
+        "(card_number, name, email, phone, joined_at, anonymised_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (card_number, name, email, phone, joined_at, anonymised_at)
     )
     member_id = cursor.lastrowid
     if member_id is None:
@@ -148,14 +157,19 @@ def insert_members(conn: sqlite3.Connection,) -> tuple[dict[str, int], dict[str,
     """
     member_ids = {}
     cards = {}
-    for name, email, phone in MEMBERS:
-        member_ids[name], cards[name] = insert_member(conn, name, email, phone)
+    for name, email, phone, card, joined_at in MEMBERS:
+        member_ids[name], cards[name] = insert_member(conn, name, email, phone, card, joined_at)
 
-    anonymised_at = datetime.now().isoformat(sep=" ", timespec="seconds")
+    anonymised_at = (date.today() - timedelta(days=30)).isoformat()
     email = f"anonymised-{secrets.token_hex(4)}@invalid.invalid"
     member_ids[ANONYMISED_NAME], cards[ANONYMISED_NAME] = insert_member(
-        conn, ANONYMISED_NAME, email, None, anonymised_at
-    )
+        conn, 
+        ANONYMISED_NAME, 
+        email, 
+        None, 
+        new_card_number(),
+        "2025-06-01",
+        anonymised_at=anonymised_at)
     return member_ids, cards
 
 
@@ -186,7 +200,7 @@ def insert_loans(
 def print_summary(cards: dict[str, str]) -> None:
     """Tell the developer what was created and how to log in as a member."""
     print(f"Created {DB_PATH.name} with test data.")
-    print("Test member cards (random, different on every run):")
+    print("Test member cards:")
     for name, card in cards.items():
         if name != ANONYMISED_NAME:
             print(f"  {name}: {card}")
