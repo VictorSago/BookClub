@@ -15,7 +15,11 @@
 # Recieve and clearly display error-messeges from API if something goes wrong in the connection with Open Library (no crash).
 # Likewise if something goes wrong when connecting to our database.
 
-import random
+import random, requests
+
+BASE = "http://127.0.0.1:8000"
+
+
 
 
 def show_books():
@@ -32,18 +36,33 @@ def add_book():
 
 def add_member():
     print("\nAdd new member:\n")
-    card_number = str(random.randrange(100000, 999999)) # ADD: Check so that number is not already in use.
+    card_number = str(random.randrange(100000, 999999)) # ADD: Check with API so that number is not already in use.
     name = ""
     email = ""
     phone = ""
 
-'''
-    while True:
+    while True:         # MAYBE ADD: Checks for typing errors
         try:
-            name = str(input(f"Please type name of the new member:"))
+            name = str(input("Please type name of the new member: "))
+            email = str(input("Please type e-mail of the new member: "))
+            phone = str(input("Please type phonenumber of the new member: "))
+            break
 
         except ValueError:
-            print("Please type first name")
+            print("Please type the requested information")
+
+
+    print(card_number, name, email, phone) # Exchange with something like below when API is online
+'''
+    member = {
+    "card_number": card_number,
+    "name": name,
+    "email": email,
+    "phone": phone
+    }
+
+    result = requests.post(f"{BASE}/members", json=member, timeout=5) # Add key if we should have it
+    return result.status_code
 '''
 
 
