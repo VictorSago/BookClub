@@ -9,6 +9,7 @@ If library.db already exists, delete it first and run this script again.
 import sys
 from pathlib import Path
 from datetime import date, datetime, timedelta
+import string
 import secrets
 import sqlite3
 from database import DB_PATH, connect
@@ -16,6 +17,9 @@ from database import DB_PATH, connect
 
 BASE_DIR = Path(__file__).parent
 SCHEMA_PATH = BASE_DIR / "schema.sql"
+
+CARD_ALPHABET = string.ascii_uppercase + string.digits
+CARD_LENGTH = 16
 
 LOAN_DAYS = 21  # Keep in sync with the default loan length in the API.
 ANONYMISED_NAME = "Anonymised member"
@@ -74,11 +78,9 @@ LOANS = [
 ]
 
 
-# def connect() -> sqlite3.Connection:
-#     """Open the database with foreign keys switched on."""
-#     conn = sqlite3.connect(DB_PATH)
-#     conn.execute("PRAGMA foreign_keys = ON")
-#     return conn
+def new_card_number() -> str:
+    """Return a random card number made of capital letters and digits."""
+    return "".join(secrets.choice(CARD_ALPHABET) for _ in range(CARD_LENGTH))
 
 
 def create_tables(conn: sqlite3.Connection) -> None:
@@ -126,7 +128,7 @@ def insert_member(
 
     Return the new member_id and the card number.
     """
-    card_number = secrets.token_urlsafe(9)
+    card_number = new_card_number()
     cursor = conn.execute(
         "INSERT INTO members "
         "(card_number, name, email, phone, anonymised_at) "
@@ -150,7 +152,7 @@ def insert_members(conn: sqlite3.Connection,) -> tuple[dict[str, int], dict[str,
         member_ids[name], cards[name] = insert_member(conn, name, email, phone)
 
     anonymised_at = datetime.now().isoformat(sep=" ", timespec="seconds")
-    email = f"anonymised-{secrets.token_hex(4)}@invalid"
+    email = f"anonymised-{secrets.token_hex(4)}@invalid.invalid"
     member_ids[ANONYMISED_NAME], cards[ANONYMISED_NAME] = insert_member(
         conn, ANONYMISED_NAME, email, None, anonymised_at
     )
