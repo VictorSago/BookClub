@@ -15,7 +15,7 @@
 # Recieve and clearly display error-messeges from API if something goes wrong in the connection with Open Library (no crash).
 # Likewise if something goes wrong when connecting to our database.
 
-import random, requests
+import requests
 
 BASE = "http://127.0.0.1:8000"
 
@@ -40,7 +40,6 @@ def add_book():
 
 def add_member():
     print("\nAdd new member:\n")
-    card_number = str(random.randrange(100000, 999999)) # ADD: Check with API so that number is not already in use. If it is, try again.
     name = ""
     email = ""
     phone = ""
@@ -59,10 +58,9 @@ def add_member():
         admin_ui()
 
 
-    print(card_number, name, email, phone) # EXCHANGE: with something like below when API is online
+    print(name, email, phone) # EXCHANGE: with something like below when API is online
 '''
     member = {
-    "card_number": card_number,
     "name": name,
     "email": email,
     "phone": phone
