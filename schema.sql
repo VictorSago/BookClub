@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS books (
     title TEXT NOT NULL CHECK (length(trim(title)) > 0),
     first_publish_year INTEGER NULL,
     isbn TEXT UNIQUE,
-    added_at TEXT NOT NULL DEFAULT (datetime('now')),
+    added_at TEXT NOT NULL DEFAULT (date('now', 'localtime')),
     open_library_key TEXT UNIQUE, -- NULL for books added by hand, otherwise taken from Open Library
     CHECK (
         first_publish_year IS NULL
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS members (
     name TEXT NOT NULL CHECK (length(trim(name)) > 0),
     email TEXT NOT NULL UNIQUE COLLATE NOCASE CHECK (email LIKE '%_@_%._%'),
     phone TEXT,
-    joined_at TEXT NOT NULL DEFAULT (datetime('now')),
+    joined_at TEXT NOT NULL DEFAULT (date('now', 'localtime')),
     anonymised_at TEXT DEFAULT NULL
 );
 
@@ -47,17 +47,15 @@ CREATE TABLE IF NOT EXISTS loans (
     loan_id INTEGER PRIMARY KEY,
     member_id INTEGER NOT NULL,
     book_id INTEGER NOT NULL,
-    loan_date TEXT NOT NULL DEFAULT (datetime('now')),
+    loan_date TEXT NOT NULL DEFAULT (date('now', 'localtime')),
     due_date TEXT NOT NULL,
     return_date TEXT,
     FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE RESTRICT,
     FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE RESTRICT,
-    CHECK (datetime(loan_date) IS NOT NULL),
-    CHECK (datetime(due_date) IS NOT NULL 
-        AND datetime(due_date) >= datetime(loan_date)), 
+    CHECK (date(loan_date) IS loan_date),
+    CHECK (date(due_date) IS due_date AND due_date >= loan_date),
     CHECK (return_date IS NULL 
-        OR (datetime(return_date) IS NOT NULL 
-            AND datetime(return_date) >= datetime(loan_date)))
+        OR (date(return_date) IS return_date AND return_date >= loan_date))
 );
 
 -- Prevent double borrowing of the same physical book.
