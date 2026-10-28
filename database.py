@@ -33,6 +33,7 @@ Examples:
 import os
 import secrets
 import sqlite3
+from collections import defaultdict
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -100,3 +101,28 @@ def connect(create: bool = False) -> Generator[sqlite3.Connection]:
         raise
     finally:
         conn.close()
+
+
+def list_books() -> list[dict]:
+    """Return every book, each with a list of its author names."""
+    with connect() as conn:
+        book_rows = conn.execute(
+            "SELECT book_id, title, first_publish_year, isbn, "
+            "open_library_key, added_at "
+            "FROM books ORDER BY title COLLATE NOCASE"
+        ).fetchall()
+        author_rows = conn.execute(
+            "SELECT ba.book_id, a.name "
+            "FROM book_authors ba "
+            "JOIN authors a ON a.author_id = ba.author_id "
+            "ORDER BY a.name COLLATE NOCASE"
+        ).fetchall()
+
+    authors_by_book = defaultdict(list)
+    for row in author_rows:
+        authors_by_book[row["book_id"]].append(row["name"])
+
+    return [
+        {**dict(row), "authors": authors_by_book[row["book_id"]]}
+        for row in book_rows
+    ]
