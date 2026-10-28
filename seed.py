@@ -9,7 +9,7 @@ If library.db already exists, delete it first and run this script again.
 import sys
 import secrets
 from pathlib import Path
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 import sqlite3
 from database import DB_PATH, connect, new_card_number
 
@@ -31,14 +31,14 @@ AUTHORS = [
 ]
 
 # (title, first publish year, ISBN or None, authors)
-# The ISBNs are made up for testing and are not real.
+# Two of the ISBNs are made up for testing and are not real.
 BOOKS = [
     ("The Hobbit", 1937, "9780000000011", ["J. R. R. Tolkien"]),
     ("The Fellowship of the Ring", 1954, None, ["J. R. R. Tolkien"]),
     ("A Wizard of Earthsea", 1968, "9780000000028", ["Ursula K. Le Guin"]),
     ("The Dispossessed", 1974, None, ["Ursula K. Le Guin"]),
     ("Guards! Guards!", 1989, None, ["Terry Pratchett"]),
-    ("Good Omens", 1990, "9780000000035", ["Terry Pratchett", "Neil Gaiman"]),
+    ("Good Omens", 1990, "057504800X", ["Terry Pratchett", "Neil Gaiman"]),
     ("Pippi Longstocking", 1945, None, ["Astrid Lindgren"]),
     ("Neverwhere", 1996, None, ["Neil Gaiman"]),
     ("The Hitchhiker's Guide to the Galaxy", 1979, "0330258648", ["Douglas Adams"]),
@@ -167,8 +167,8 @@ def insert_members(conn: sqlite3.Connection,) -> tuple[dict[str, int], dict[str,
         ANONYMISED_NAME, 
         email, 
         None, 
-        new_card_number(),
-        "2025-06-01",
+        new_card_number(), 
+        "2025-06-01", 
         anonymised_at=anonymised_at)
     return member_ids, cards
 
@@ -211,7 +211,6 @@ def main() -> None:
     if DB_PATH.exists():
         sys.exit(f"{DB_PATH.name} already exists. Delete it and run again.")
 
-    conn = connect()
     try:
         with connect(create=True) as conn:
             create_tables(conn)
@@ -219,7 +218,7 @@ def main() -> None:
             book_ids = insert_books(conn, author_ids)
             member_ids, cards = insert_members(conn)
             insert_loans(conn, book_ids, member_ids)
-    except sqlite3.Error:
+    except Exception:
         DB_PATH.unlink()
         raise
     print_summary(cards)

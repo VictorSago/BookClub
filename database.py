@@ -31,7 +31,6 @@ Examples:
 """
 
 import os
-import string
 import secrets
 import sqlite3
 from collections.abc import Generator
@@ -43,9 +42,8 @@ DEFAULT_DB = BASE_DIR / "library.db"
 
 DB_PATH = Path(os.environ.get("LIBRARY_DB", DEFAULT_DB))
 
-# CARD_ALPHABET = string.ascii_uppercase + string.digits
 CARD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890"
-CARD_LENGTH = 16
+CARD_LENGTH = 10
 
 
 def new_card_number() -> str:
