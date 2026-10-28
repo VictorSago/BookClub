@@ -31,6 +31,7 @@ Examples:
 """
 
 import os
+import secrets
 import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -40,6 +41,14 @@ BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DB = BASE_DIR / "library.db"
 
 DB_PATH = Path(os.environ.get("LIBRARY_DB", DEFAULT_DB))
+
+CARD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890"
+CARD_LENGTH = 12
+
+
+def new_card_number() -> str:
+    """Return a random card number made of capital letters and digits."""
+    return "".join(secrets.choice(CARD_ALPHABET) for _ in range(CARD_LENGTH))
 
 
 def get_connection(create: bool = False) -> sqlite3.Connection:
