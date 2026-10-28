@@ -51,15 +51,15 @@ BOOKS = [
 
 # (name, email, phone, card number, joined). All fake test data.
 MEMBERS = [
-    ("Alice Primary", "alice@example.com", "070-000 00 01", "DEMOCARD00000001", "2025-09-14"),
-    ("Bob Companion", "bob@example.com", None, "DEMOCARD00000002", "2025-11-03"),
-    ("Cecilia Tertison", "cecilia@example.com", "070-000 00 03", "DEMOCARD00000003", "2026-01-20"),
-    ("David Friendly", "david@example.com", None, "DEMOCARD00000004", "2026-03-08"),
-    ("Eve Mallory", "eve.m@example.com", None, "DEMOCARD00000005", "2026-03-08"),
-    ("Arthur Dent", "arthur@example.com", "070-000 00 05", "DEMOCARD00000006", "2026-04-02"),
-    ("Ford Prefect", "ford@example.com", None, "DEMOCARD00000007", "2026-05-17"),
-    ("Zaphod Beeblebrox", "zaphod@example.com", "070-000 00 07", "DEMOCARD00000008", "2026-06-09"),
-    ("Random Frequent Flyer Dent", "random.ffd@example.com", None, "DEMOCARD00000009", "2026-08-09")
+    ("Alice Primary", "alice@example.com", "070-000 00 01", "DEMOCARD0001", "2025-09-14"),
+    ("Bob Companion", "bob@example.com", None, "DEMOCARD0002", "2025-11-03"),
+    ("Cecilia Tertison", "cecilia@example.com", "070-000 00 03", "DEMOCARD0003", "2026-01-20"),
+    ("David Friendly", "david@example.com", None, "DEMOCARD0004", "2026-03-08"),
+    ("Eve Mallory", "eve.m@example.com", None, "DEMOCARD0005", "2026-03-08"),
+    ("Arthur Dent", "arthur@example.com", "070-000 00 05", "DEMOCARD0006", "2026-04-02"),
+    ("Ford Prefect", "ford@example.com", None, "DEMOCARD0007", "2026-05-17"),
+    ("Zaphod Beeblebrox", "zaphod@example.com", "070-000 00 07", "DEMOCARD0008", "2026-06-09"),
+    ("Random Frequent Flyer Dent", "random.ffd@example.com", None, "DEMOCARD0009", "2026-08-09")
 ]
 
 # (book title, member name, days since loan, days since return or None)

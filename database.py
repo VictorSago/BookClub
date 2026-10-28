@@ -43,7 +43,7 @@ DEFAULT_DB = BASE_DIR / "library.db"
 DB_PATH = Path(os.environ.get("LIBRARY_DB", DEFAULT_DB))
 
 CARD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890"
-CARD_LENGTH = 10
+CARD_LENGTH = 12
 
 
 def new_card_number() -> str:
