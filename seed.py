@@ -30,23 +30,23 @@ AUTHORS = [
     "Roger Zelazny"
 ]
 
-# (title, first publish year, ISBN or None, authors)
+# (title, first publish year, ISBN or None, authors, added_at)
 # Two of the ISBNs are made up for testing and are not real.
 BOOKS = [
-    ("The Hobbit", 1937, "9780000000011", ["J. R. R. Tolkien"]),
-    ("The Fellowship of the Ring", 1954, None, ["J. R. R. Tolkien"]),
-    ("A Wizard of Earthsea", 1968, "9780000000028", ["Ursula K. Le Guin"]),
-    ("The Dispossessed", 1974, None, ["Ursula K. Le Guin"]),
-    ("Guards! Guards!", 1989, None, ["Terry Pratchett"]),
-    ("Good Omens", 1990, "057504800X", ["Terry Pratchett", "Neil Gaiman"]),
-    ("Pippi Longstocking", 1945, None, ["Astrid Lindgren"]),
-    ("Neverwhere", 1996, None, ["Neil Gaiman"]),
-    ("The Hitchhiker's Guide to the Galaxy", 1979, "0330258648", ["Douglas Adams"]),
-    ("The Restaurant at the End of the Universe", 1980, "0345391810", ["Douglas Adams"]),
-    ("Life, the Universe and Everything", 1982, "0330267388", ["Douglas Adams"]),
-    ("So Long, and Thanks for All the Fish", 1984, "0330287001", ["Douglas Adams"]),
-    ("Mostly Harmless", 1992, "0330323113", ["Douglas Adams"]),
-    ("A Night in the Lonesome October", 1993, "0688125085", ["Roger Zelazny"])
+    ("The Hobbit", 1937, "9780000000011", ["J. R. R. Tolkien"], "2026-02-10"),
+    ("The Fellowship of the Ring", 1954, None, ["J. R. R. Tolkien"], "2026-09-15"),
+    ("A Wizard of Earthsea", 1968, "9780000000028", ["Ursula K. Le Guin"], "2026-03-05"),
+    ("The Dispossessed", 1974, None, ["Ursula K. Le Guin"], "2026-04-18"),
+    ("Guards! Guards!", 1989, None, ["Terry Pratchett"], "2026-01-12"),
+    ("Good Omens", 1990, "057504800X", ["Terry Pratchett", "Neil Gaiman"], "2026-06-20"),
+    ("Pippi Longstocking", 1945, None, ["Astrid Lindgren"], "2026-05-02"),
+    ("Neverwhere", 1996, None, ["Neil Gaiman"], "2026-08-14"),
+    ("The Hitchhiker's Guide to the Galaxy", 1979, "0330258648", ["Douglas Adams"], "2026-02-20"),
+    ("The Restaurant at the End of the Universe", 1980, "0345391810", ["Douglas Adams"], "2026-02-20"),
+    ("Life, the Universe and Everything", 1982, "0330267388", ["Douglas Adams"], "2026-03-15"),
+    ("So Long, and Thanks for All the Fish", 1984, "0330287001", ["Douglas Adams"], "2026-09-02"),
+    ("Mostly Harmless", 1992, "0330323113", ["Douglas Adams"], "2026-10-12"),
+    ("A Night in the Lonesome October", 1993, "0688125085", ["Roger Zelazny"], "2026-09-25")
 ]
 
 # (name, email, phone, card number, joined). All fake test data.
@@ -107,11 +107,11 @@ def insert_books(
     ) -> dict[str, int]:
     """Insert the books and their authors. Return a map from title to book_id."""
     book_ids = {}
-    for title, year, isbn, authors in BOOKS:
+    for title, year, isbn, authors, added_at in BOOKS:
         cursor = conn.execute(
-            "INSERT INTO books (title, first_publish_year, isbn) "
-            "VALUES (?, ?, ?)",
-            (title, year, isbn)
+            "INSERT INTO books (title, first_publish_year, isbn, added_at) "
+            "VALUES (?, ?, ?, ?)",
+            (title, year, isbn, added_at)
         )
         book_id = cursor.lastrowid
         book_ids[title] = book_id
