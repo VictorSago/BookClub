@@ -137,7 +137,6 @@ def insert_member(
 
     Return the new member_id and the card number.
     """
-    #card_number = new_card_number()
     cursor = conn.execute(
         "INSERT INTO members "
         "(card_number, name, email, phone, joined_at, anonymised_at) "
@@ -219,7 +218,7 @@ def main() -> None:
             member_ids, cards = insert_members(conn)
             insert_loans(conn, book_ids, member_ids)
     except Exception:
-        DB_PATH.unlink()
+        DB_PATH.unlink(missing_ok=True)
         raise
     print_summary(cards)
 
