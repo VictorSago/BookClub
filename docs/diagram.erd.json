@@ -1,0 +1,362 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dineug/erd-editor/main/json-schema/schema.json",
+  "version": "3.0.0",
+  "settings": {
+    "originX": 0,
+    "originY": 0,
+    "zoomLevel": 1,
+    "show": 4589,
+    "database": 32,
+    "databaseName": "",
+    "canvasType": "ERD",
+    "language": 1,
+    "tableNameCase": 4,
+    "columnNameCase": 2,
+    "bracketType": 1,
+    "relationshipDataTypeSync": true,
+    "columnOrder": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "maxWidthComment": -1,
+    "lockSettings": 63
+  },
+  "doc": {
+    "tableIds": [
+      "03h4dew3f4en2qdw1hyegldse",
+      "03h4dewzeu385d1efse98yb79",
+      "03h4deyc0vrmvno7rfx9zoiff",
+      "03h4df2xlrmy4v2xc2tbt1ycd",
+      "03h4df3vkey4gd3gdit2kdvlb"
+    ],
+    "relationshipIds": [
+      "03h4iytvqxpcxmz3c9n0c199c",
+      "03h4j3s8qnx59pnd6kr14rkec",
+      "03h4j3utmltc26e633vzqj9s6",
+      "03h4j8wocz1lq3t3lym49jzxu"
+    ]
+  },
+  "collections": {
+    "tableEntities": {
+      "03h4dew3f4en2qdw1hyegldse": {
+        "id": "03h4dew3f4en2qdw1hyegldse",
+        "name": "books",
+        "columnIds": [
+          "03h4j3jnzc0gjsvf88q6l376o",
+          "03h4j3m3eer4fkho5an41z6sg",
+          "03h4j4nmeklylt5uu0sdhp88m",
+          "03h4jgfz3lfwi7wjn8ct3nneb",
+          "03h4j8g4mqch5msbg06z0sz84",
+          "03h4ji3h75ddetwev8z0nx1r6"
+        ],
+        "ui": {
+          "x": -484.857,
+          "y": 524.2383
+        }
+      },
+      "03h4dewzeu385d1efse98yb79": {
+        "id": "03h4dewzeu385d1efse98yb79",
+        "name": "authors",
+        "columnIds": [
+          "03h4j2k7zthtuubb8w9oszdds",
+          "03h4j2nhat050bkxzezr46ui2"
+        ],
+        "ui": {
+          "x": 483.5847,
+          "y": 572.1389
+        }
+      },
+      "03h4deyc0vrmvno7rfx9zoiff": {
+        "id": "03h4deyc0vrmvno7rfx9zoiff",
+        "name": "members",
+        "columnIds": [
+          "03h4iyfke8ra6uurd5eoo4sg0",
+          "03h4j5z2r1ns0y57am7grrivh",
+          "03h4j22etwji5javlfkalj5t0",
+          "03h4j25sif0y9oc8rvi8bmd9q",
+          "03h4j5vam9vnm5967ksoo12af",
+          "03h4j6y69e4ix0c9sv3vgf51e",
+          "03h4j7342129dksn6m35yq0pv"
+        ],
+        "ui": {
+          "x": 333.8501,
+          "y": 819.9089
+        }
+      },
+      "03h4df2xlrmy4v2xc2tbt1ycd": {
+        "id": "03h4df2xlrmy4v2xc2tbt1ycd",
+        "name": "loans",
+        "columnIds": [
+          "03h4iyojihrtmw7tbk9qbenn3",
+          "03h4iytvqxpcxmz3c9m19660x",
+          "03h4j8wocz1lq3t3lyku9314q",
+          "03h4j90tw6krwl6n0ja4t85ga",
+          "03h4j91qlkaxv6hh8sol1mioq",
+          "03h4j92znv0fyfo31memtye09"
+        ],
+        "ui": {
+          "x": -469.0703,
+          "y": 831.8676
+        }
+      },
+      "03h4df3vkey4gd3gdit2kdvlb": {
+        "id": "03h4df3vkey4gd3gdit2kdvlb",
+        "name": "book_authors",
+        "columnIds": [
+          "03h4j3s8qnx59pnd6kp9ebazu",
+          "03h4j3utmltc26e633t5w0slb"
+        ],
+        "ui": {
+          "x": 42.6183,
+          "y": 572.5298
+        }
+      }
+    },
+    "tableColumnEntities": {
+      "03h4j3jnzc0gjsvf88q6l376o": {
+        "id": "03h4j3jnzc0gjsvf88q6l376o",
+        "tableId": "03h4dew3f4en2qdw1hyegldse",
+        "name": "book_id",
+        "dataType": "INTEGER",
+        "options": 10
+      },
+      "03h4j3m3eer4fkho5an41z6sg": {
+        "id": "03h4j3m3eer4fkho5an41z6sg",
+        "tableId": "03h4dew3f4en2qdw1hyegldse",
+        "name": "title",
+        "dataType": "TEXT",
+        "options": 8
+      },
+      "03h4j4nmeklylt5uu0sdhp88m": {
+        "id": "03h4j4nmeklylt5uu0sdhp88m",
+        "tableId": "03h4dew3f4en2qdw1hyegldse",
+        "name": "first_publish_year",
+        "dataType": "INTEGER",
+        "options": 0
+      },
+      "03h4j8g4mqch5msbg06z0sz84": {
+        "id": "03h4j8g4mqch5msbg06z0sz84",
+        "tableId": "03h4dew3f4en2qdw1hyegldse",
+        "name": "added_at",
+        "dataType": "TEXT",
+        "default": "datetime('now')",
+        "options": 0
+      },
+      "03h4jgfz3lfwi7wjn8ct3nneb": {
+        "id": "03h4jgfz3lfwi7wjn8ct3nneb",
+        "tableId": "03h4dew3f4en2qdw1hyegldse",
+        "name": "isbn",
+        "dataType": "TEXT",
+        "options": 4
+      },
+      "03h4ji3h75ddetwev8z0nx1r6": {
+        "id": "03h4ji3h75ddetwev8z0nx1r6",
+        "tableId": "03h4dew3f4en2qdw1hyegldse",
+        "name": "open_library_key",
+        "dataType": "TEXT",
+        "options": 4
+      },
+      "03h4j2k7zthtuubb8w9oszdds": {
+        "id": "03h4j2k7zthtuubb8w9oszdds",
+        "tableId": "03h4dewzeu385d1efse98yb79",
+        "name": "author_id",
+        "dataType": "INTEGER",
+        "options": 10
+      },
+      "03h4j2nhat050bkxzezr46ui2": {
+        "id": "03h4j2nhat050bkxzezr46ui2",
+        "tableId": "03h4dewzeu385d1efse98yb79",
+        "name": "name",
+        "dataType": "TEXT",
+        "options": 0
+      },
+      "03h4iyfke8ra6uurd5eoo4sg0": {
+        "id": "03h4iyfke8ra6uurd5eoo4sg0",
+        "tableId": "03h4deyc0vrmvno7rfx9zoiff",
+        "name": "member_id",
+        "dataType": "INTEGER",
+        "options": 10
+      },
+      "03h4j22etwji5javlfkalj5t0": {
+        "id": "03h4j22etwji5javlfkalj5t0",
+        "tableId": "03h4deyc0vrmvno7rfx9zoiff",
+        "name": "name",
+        "dataType": "TEXT",
+        "options": 8
+      },
+      "03h4j25sif0y9oc8rvi8bmd9q": {
+        "id": "03h4j25sif0y9oc8rvi8bmd9q",
+        "tableId": "03h4deyc0vrmvno7rfx9zoiff",
+        "name": "email",
+        "dataType": "TEXT",
+        "options": 12
+      },
+      "03h4j5vam9vnm5967ksoo12af": {
+        "id": "03h4j5vam9vnm5967ksoo12af",
+        "tableId": "03h4deyc0vrmvno7rfx9zoiff",
+        "name": "phone",
+        "dataType": "TEXT",
+        "options": 0
+      },
+      "03h4j5z2r1ns0y57am7grrivh": {
+        "id": "03h4j5z2r1ns0y57am7grrivh",
+        "tableId": "03h4deyc0vrmvno7rfx9zoiff",
+        "name": "card_number",
+        "dataType": "TEXT",
+        "options": 12
+      },
+      "03h4j6y69e4ix0c9sv3vgf51e": {
+        "id": "03h4j6y69e4ix0c9sv3vgf51e",
+        "tableId": "03h4deyc0vrmvno7rfx9zoiff",
+        "name": "joined_at",
+        "dataType": "TEXT",
+        "default": "datetime('now')",
+        "options": 8
+      },
+      "03h4j7342129dksn6m35yq0pv": {
+        "id": "03h4j7342129dksn6m35yq0pv",
+        "tableId": "03h4deyc0vrmvno7rfx9zoiff",
+        "name": "anonymised_at",
+        "dataType": "TEXT",
+        "default": "NULL",
+        "options": 0
+      },
+      "03h4iyojihrtmw7tbk9qbenn3": {
+        "id": "03h4iyojihrtmw7tbk9qbenn3",
+        "tableId": "03h4df2xlrmy4v2xc2tbt1ycd",
+        "name": "loan_id",
+        "dataType": "INTEGER",
+        "options": 10
+      },
+      "03h4iytvqxpcxmz3c9m19660x": {
+        "id": "03h4iytvqxpcxmz3c9m19660x",
+        "tableId": "03h4df2xlrmy4v2xc2tbt1ycd",
+        "name": "member_id",
+        "dataType": "INTEGER",
+        "options": 8
+      },
+      "03h4j8wocz1lq3t3lyku9314q": {
+        "id": "03h4j8wocz1lq3t3lyku9314q",
+        "tableId": "03h4df2xlrmy4v2xc2tbt1ycd",
+        "name": "book_id",
+        "dataType": "INTEGER",
+        "options": 8
+      },
+      "03h4j90tw6krwl6n0ja4t85ga": {
+        "id": "03h4j90tw6krwl6n0ja4t85ga",
+        "tableId": "03h4df2xlrmy4v2xc2tbt1ycd",
+        "name": "loan_date",
+        "dataType": "TEXT",
+        "default": "datetime('now')",
+        "options": 8
+      },
+      "03h4j91qlkaxv6hh8sol1mioq": {
+        "id": "03h4j91qlkaxv6hh8sol1mioq",
+        "tableId": "03h4df2xlrmy4v2xc2tbt1ycd",
+        "name": "due_date",
+        "dataType": "TEXT",
+        "options": 8
+      },
+      "03h4j92znv0fyfo31memtye09": {
+        "id": "03h4j92znv0fyfo31memtye09",
+        "tableId": "03h4df2xlrmy4v2xc2tbt1ycd",
+        "name": "return_date",
+        "dataType": "TEXT",
+        "options": 0
+      },
+      "03h4j3s8qnx59pnd6kp9ebazu": {
+        "id": "03h4j3s8qnx59pnd6kp9ebazu",
+        "tableId": "03h4df3vkey4gd3gdit2kdvlb",
+        "name": "book_id",
+        "dataType": "INTEGER",
+        "options": 10
+      },
+      "03h4j3utmltc26e633t5w0slb": {
+        "id": "03h4j3utmltc26e633t5w0slb",
+        "tableId": "03h4df3vkey4gd3gdit2kdvlb",
+        "name": "author_id",
+        "dataType": "INTEGER",
+        "options": 10
+      }
+    },
+    "relationshipEntities": {
+      "03h4iytvqxpcxmz3c9n0c199c": {
+        "id": "03h4iytvqxpcxmz3c9n0c199c",
+        "relationshipType": 16,
+        "onDelete": 32,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "03h4deyc0vrmvno7rfx9zoiff",
+          "columnIds": [
+            "03h4iyfke8ra6uurd5eoo4sg0"
+          ]
+        },
+        "end": {
+          "tableId": "03h4df2xlrmy4v2xc2tbt1ycd",
+          "columnIds": [
+            "03h4iytvqxpcxmz3c9m19660x"
+          ]
+        }
+      },
+      "03h4j3s8qnx59pnd6kr14rkec": {
+        "id": "03h4j3s8qnx59pnd6kr14rkec",
+        "relationshipType": 16,
+        "onDelete": 1,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "03h4dew3f4en2qdw1hyegldse",
+          "columnIds": [
+            "03h4j3jnzc0gjsvf88q6l376o"
+          ]
+        },
+        "end": {
+          "tableId": "03h4df3vkey4gd3gdit2kdvlb",
+          "columnIds": [
+            "03h4j3s8qnx59pnd6kp9ebazu"
+          ]
+        }
+      },
+      "03h4j3utmltc26e633vzqj9s6": {
+        "id": "03h4j3utmltc26e633vzqj9s6",
+        "relationshipType": 16,
+        "onDelete": 1,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "03h4dewzeu385d1efse98yb79",
+          "columnIds": [
+            "03h4j2k7zthtuubb8w9oszdds"
+          ]
+        },
+        "end": {
+          "tableId": "03h4df3vkey4gd3gdit2kdvlb",
+          "columnIds": [
+            "03h4j3utmltc26e633t5w0slb"
+          ]
+        }
+      },
+      "03h4j8wocz1lq3t3lym49jzxu": {
+        "id": "03h4j8wocz1lq3t3lym49jzxu",
+        "relationshipType": 16,
+        "onDelete": 32,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "03h4dew3f4en2qdw1hyegldse",
+          "columnIds": [
+            "03h4j3jnzc0gjsvf88q6l376o"
+          ]
+        },
+        "end": {
+          "tableId": "03h4df2xlrmy4v2xc2tbt1ycd",
+          "columnIds": [
+            "03h4j8wocz1lq3t3lyku9314q"
+          ]
+        }
+      }
+    }
+  }
+}
