@@ -15,8 +15,7 @@
 # Recieve and clearly display error-messeges from API if something goes wrong in the connection with Open Library (no crash).
 # Likewise if something goes wrong when connecting to our database.
 
-
-# import requests
+import requests
 
 BASE = "http://127.0.0.1:8000"
 
@@ -72,12 +71,12 @@ def add_member():
 '''
 
 
-
 def exit_program():
     # Shutdown sequence
     print("Turning system off")
 
     exit()
+
 
 
 def admin_ui():     # Do we need some kind of credentials to enter admin UI?
@@ -96,6 +95,7 @@ def admin_ui():     # Do we need some kind of credentials to enter admin UI?
             main()
         else:
             print ("\nIncorrect command, try again")
+
 
 
 def main():
