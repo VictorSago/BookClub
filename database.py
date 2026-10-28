@@ -107,9 +107,13 @@ def list_books() -> list[dict]:
     """Return every book, each with a list of its author names."""
     with connect() as conn:
         book_rows = conn.execute(
-            "SELECT book_id, title, first_publish_year, isbn, "
-            "open_library_key, added_at "
-            "FROM books ORDER BY title COLLATE NOCASE"
+            "SELECT b.book_id, b.title, b.first_publish_year, b.isbn, "
+            "b.open_library_key, b.added_at, "
+            "NOT EXISTS ("
+            "    SELECT 1 FROM loans l "
+            "    WHERE l.book_id = b.book_id AND l.return_date IS NULL"
+            ") AS available "
+            "FROM books b ORDER BY b.title COLLATE NOCASE"
         ).fetchall()
         author_rows = conn.execute(
             "SELECT ba.book_id, a.name "
@@ -123,6 +127,5 @@ def list_books() -> list[dict]:
         authors_by_book[row["book_id"]].append(row["name"])
 
     return [
-        {**dict(row), "authors": authors_by_book[row["book_id"]]}
-        for row in book_rows
+        {**dict(row), "authors": authors_by_book[row["book_id"]]} for row in book_rows
     ]

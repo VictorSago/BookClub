@@ -10,3 +10,4 @@ class BookOut(BaseModel):
     open_library_key: str | None = None
     added_at: str
     authors: list[str]
+    available: bool
