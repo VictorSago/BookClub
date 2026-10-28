@@ -19,17 +19,15 @@
 
 import os, requests
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
 
 load_dotenv(".env")
 
-app = FastAPI()
 
 api_key = os.getenv("API_KEY")
 
 BASE = "http://127.0.0.1:8000"
 
-credentials = False       # If True the card number has been confirmed, starts as False
+credentials = False       # If True the card number has been confirmed with user_login(), starts as False
 
 
 def show_books():
