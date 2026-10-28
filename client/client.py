@@ -15,11 +15,21 @@
 # Recieve and clearly display error-messeges from API if something goes wrong in the connection with Open Library (no crash).
 # Likewise if something goes wrong when connecting to our database.
 
-import requests
+
+
+import os, requests
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+
+load_dotenv(".env")
+
+app = FastAPI()
+
+api_key = os.getenv("API_KEY")
 
 BASE = "http://127.0.0.1:8000"
 
-
+credentials = False       # If True the card number has been confirmed, starts as False
 
 
 def show_books():
@@ -66,8 +76,30 @@ def add_member():
     "phone": phone
     }
 
-    result = requests.post(f"{BASE}/members", json=member, timeout=5) # Add key if we should have it
-    return result.status_code
+    response = requests.post(f"{BASE}/members", json=member, timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
+    return response.status_code
+'''
+
+
+def user_login():
+    cardnumber = str(input("Please enter your library card number: "))
+    print(cardnumber)      # EXCHANGE: with something like below when API is online
+    return True            # EXCHANGE: with something like below when API is online
+
+'''
+    members = requests.get(f"{BASE}/members/", timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
+    
+    if members.raise_for_status() == None:
+        members = members.json()
+        for member in members:
+            if member["card_number"] == cardnumber:
+                print(f"Welcome {member["name"]}")
+                return True
+            else:
+                print("Card number not valid")
+                return False
+    else:
+        print("Server connection failure or wrong API key") # DEVELOP: with the correct API responses
 '''
 
 
@@ -78,8 +110,7 @@ def exit_program():
     exit()
 
 
-
-def admin_ui():     # Do we need some kind of credentials to enter admin UI?
+def admin_ui():
         
     while True:
         try:
@@ -97,11 +128,15 @@ def admin_ui():     # Do we need some kind of credentials to enter admin UI?
             print ("\nIncorrect command, try again")
 
 
-
 def main():
     print("Welcome to your local library system!")
 
-    while True:
+    global credentials
+
+    if credentials == False:
+        credentials = user_login()
+
+    while credentials == True:
         try:
             user_input = int(input(f"\nType a single number: \n1) Administrative functions (librarian)\n2) Show books\n3) Borrow book\n4) Return book\n0) Exit program\n"))
         except ValueError:
