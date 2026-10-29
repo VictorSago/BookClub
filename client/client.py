@@ -19,6 +19,7 @@
 
 import os, requests
 import user_session
+import input_handlers
 from dotenv import load_dotenv
 
 load_dotenv(".env")
@@ -51,18 +52,14 @@ def add_member():
     email = ""
     phone = ""
     
-    user_input = int(input("Are you sure you want to create a new member? 1) Yes, 0) No: "))
+    user_input = input_handlers.get_int_input("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
-    if user_input == 1: # ADD: Checks for typing errors
-        try:
-            name = str(input("Please type name of the new member: "))
-            email = str(input("Please type e-mail of the new member: "))
-            phone = str(input("Please type phonenumber of the new member: "))
-
-        except ValueError:
-            print("Please try again and type the requested information")
+    if user_input == 1: # ADD: Checks for typing errors - phone number
+        name = input_handlers.get_not_empty_text("Please type name of the new member: ", "Name cannot be empty.")
+        email = input_handlers.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
+        phone = input_handlers.get_not_empty_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
     else:
-        admin_ui()
+        return
 
     print(name, email, phone) # EXCHANGE: with something like below when API is online
 '''
@@ -78,7 +75,10 @@ def add_member():
 
 
 def user_login():
-    cardnumber = str(input("Please enter your library card number: ")) 
+    cardnumber = input_handlers.get_not_empty_text(
+        "Please enter your library card number: ", # prompt for user input
+        "Card number is your personal 12-digit number. Please try again."  #error message for empty input
+    )
     user_session.set_userdata({"cardnumber": cardnumber}) # PLACEHOLDER for show without FastAPI connection
     print(user_session._userdata, "Welcome!")             # These three lines should be replaced with API query for cardnumber-check
     return None                                           # If cardnumber and API-Key is correct -> user_session.set_userdata({"cardnumber": cardnumber})
@@ -97,23 +97,19 @@ def exit_program():
 
 
 def admin_ui():
-        
     while True:
-        try:
-            user_input = int(input(f"\nAdministrator functions: \n1) Add book to library\n2) Register new member\n0) Exit to main menu\n"))
-        except ValueError:
-            print("Please type a single number")
-            continue
-
+        user_input = input_handlers.get_int_input(
+            f"\nAdministrator functions: \n1) Add book to library\n2) Register new member\n0) Exit to main menu\n",
+            0, 2
+        )
+        
         if user_input == 1:
             add_book()
         elif user_input == 2:
             add_member()
         elif user_input == 0:
             break
-        else:
-            print ("\nIncorrect command, try again")
-
+            
 
 def main():
     print("Welcome to your local library system!")
@@ -122,11 +118,10 @@ def main():
         user_login()
 
     while user_session.is_loggedin() == True:
-        try:
-            user_input = int(input(f"\nType a single number: \n1) Administrative functions (librarian)\n2) Show books\n3) Borrow book\n4) Return book\n0) Exit program\n"))
-        except ValueError:
-            print("Please type a single number")
-            continue
+        user_input = input_handlers.get_int_input(
+            f"\nType a single number: \n1) Administrative functions (librarian)\n2) Show books\n3) Borrow book\n4) Return book\n0) Exit program\n",
+            0, 4
+        )
 
         if user_input == 1:
             admin_ui()
@@ -138,8 +133,6 @@ def main():
             return_book()
         elif user_input == 0:
             exit_program()
-        else:
-            print ("\nIncorrect command, try again")
 
 
 if __name__ == "__main__":
