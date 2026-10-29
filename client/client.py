@@ -114,6 +114,7 @@ def admin_ui():
             user_input = int(input(f"\nAdministrator functions: \n1) Add book to library\n2) Register new member\n0) Exit to main menu\n"))
         except ValueError:
             print("Please type a single number")
+            continue
 
         if user_input == 1:
             add_book()
@@ -138,6 +139,7 @@ def main():
             user_input = int(input(f"\nType a single number: \n1) Administrative functions (librarian)\n2) Show books\n3) Borrow book\n4) Return book\n0) Exit program\n"))
         except ValueError:
             print("Please type a single number")
+            continue
 
         if user_input == 1:
             admin_ui()
