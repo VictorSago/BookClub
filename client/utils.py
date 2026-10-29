@@ -55,6 +55,50 @@ def get_int_input(
             print(f"Please enter a number between {min_value} and {max_value}")
 
 
+def is_valid_email(email: str) -> bool:
+    """Simple email address format validation using standard string operations.
+
+    Args:
+        email (str): Email string to validate.
+
+    Returns:
+        bool: True if email matches basic structural requirements, False otherwise.
+    """
+    if " " in email or email.count("@") != 1:
+        return False
+
+    local_part, domain_part = email.split("@")
+
+    if not local_part:
+        return False
+
+    # At least one dot but not at the start or end
+    if "." not in domain_part or domain_part.startswith(".") or domain_part.endswith("."):
+        return False
+
+    return True
+
+
+def get_valid_email(
+    prompt: str,
+    error_message: str = "Invalid email format. Please try again.",
+) -> str:
+    """Prompt the user for an email address and validate its format.
+
+    Args:
+        prompt (str): Text prompt displayed to the user.
+        error_message (str): Message shown when the entered email is invalid.
+
+    Returns:
+        str: Validated email address.
+    """
+    while True:
+        email = input(prompt).strip()
+        if is_valid_email(email):
+                    return email
+        print(error_message)
+
+
 def get_valid_format_date(
     prompt: str,
     error_message: str | None = None
