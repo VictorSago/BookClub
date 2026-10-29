@@ -33,3 +33,17 @@ Tasks:
 - Maryna: Validation Functions
 - Christofer: UI Draft login function
 - Mohana: External API for Open Library
+
+## 2026-10-28
+On yesterday:
+- Built on external API, tested and works, needs review
+- Validation functions created, empty string, check format, check so that date is in future, check date range
+- API app, avalability status for book, title and year.
+- Login functunality in UI
+
+
+Tasks:
+- Mohana: Reviews, continue on external API
+- Victor: Reviews, continue with API app
+- Maryna: Reviews and Validation functions, Work with Christofer on UI
+- Christofer: Reviews, continue UI -> Show books
