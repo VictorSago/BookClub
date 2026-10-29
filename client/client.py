@@ -19,7 +19,7 @@
 
 import os, requests
 import user_session
-import utils
+import input_handlers
 from dotenv import load_dotenv
 
 load_dotenv(".env")
@@ -52,12 +52,12 @@ def add_member():
     email = ""
     phone = ""
     
-    user_input = utils.get_int_input("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
+    user_input = input_handlers.get_int_input("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
     if user_input == 1: # ADD: Checks for typing errors - phone number
-        name = utils.get_not_empty_text("Please type name of the new member: ", "Name cannot be empty.")
-        email = utils.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
-        phone = utils.get_not_empty_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
+        name = input_handlers.get_not_empty_text("Please type name of the new member: ", "Name cannot be empty.")
+        email = input_handlers.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
+        phone = input_handlers.get_not_empty_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
     else:
         return
 
@@ -75,9 +75,9 @@ def add_member():
 
 
 def user_login():
-    cardnumber = utils.get_not_empty_text(
+    cardnumber = input_handlers.get_not_empty_text(
         "Please enter your library card number: ", # prompt for user input
-        "Card number is your personal 16-digit number. Please try again."  #error message for empty input
+        "Card number is your personal 12-digit number. Please try again."  #error message for empty input
     )
     user_session.set_userdata({"cardnumber": cardnumber}) # PLACEHOLDER for show without FastAPI connection
     print(user_session._userdata, "Welcome!")             # These three lines should be replaced with API query for cardnumber-check
@@ -98,7 +98,7 @@ def exit_program():
 
 def admin_ui():
     while True:
-        user_input = utils.get_int_input(
+        user_input = input_handlers.get_int_input(
             f"\nAdministrator functions: \n1) Add book to library\n2) Register new member\n0) Exit to main menu\n",
             0, 2
         )
@@ -118,7 +118,7 @@ def main():
         user_login()
 
     while user_session.is_loggedin() == True:
-        user_input = utils.get_int_input(
+        user_input = input_handlers.get_int_input(
             f"\nType a single number: \n1) Administrative functions (librarian)\n2) Show books\n3) Borrow book\n4) Return book\n0) Exit program\n",
             0, 4
         )
