@@ -86,14 +86,6 @@ def user_login():
 '''
     member = # query fastAPI requests.get(f"{BASE}/members/", timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
     
-        if member member.status_code = :
-            print(f"Welcome {member["name"]}")
-            user_session.set_userdata({"cardnumber": cardnumber})
-            else:
-                print("Card number not valid")
-                return False
-    else:
-        print("Server connection failure or wrong API key") # DEVELOP: with the correct API responses
 '''
 
 
