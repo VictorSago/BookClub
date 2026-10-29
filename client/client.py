@@ -54,7 +54,7 @@ def add_member():
     
     user_input = int(input("Are you sure you want to create a new member? 1) Yes, 0) No: "))
 
-    if user_input == 1: # MAYBE ADD: Checks for typing errors
+    if user_input == 1: # ADD: Checks for typing errors
         try:
             name = str(input("Please type name of the new member: "))
             email = str(input("Please type e-mail of the new member: "))
@@ -64,7 +64,6 @@ def add_member():
             print("Please try again and type the requested information")
     else:
         admin_ui()
-
 
     print(name, email, phone) # EXCHANGE: with something like below when API is online
 '''
@@ -121,7 +120,7 @@ def admin_ui():
         elif user_input == 2:
             add_member()
         elif user_input == 0:
-            main()
+            break
         else:
             print ("\nIncorrect command, try again")
 
@@ -152,7 +151,6 @@ def main():
             exit_program()
         else:
             print ("\nIncorrect command, try again")
-
 
 
 if __name__ == "__main__":
