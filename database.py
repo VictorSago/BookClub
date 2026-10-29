@@ -33,6 +33,7 @@ Examples:
 import os
 import secrets
 import sqlite3
+from collections import defaultdict
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -100,3 +101,68 @@ def connect(create: bool = False) -> Generator[sqlite3.Connection]:
         raise
     finally:
         conn.close()
+
+
+def _like_pattern(text: str) -> str:
+    """Turn user text into a "contains" pattern for LIKE, with the
+    wildcard characters % and _ treated as ordinary characters."""
+    escaped = text.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_")
+    return "%" + escaped + "%"
+
+
+def list_books(
+    *, title: str | None = None, year: int | None = None, author: str | None
+    ) -> list[dict]:
+    """Return books, each with a list of its author names.
+
+    Filters are optional and combine with AND:
+        title: the title contains this text (case-insensitive for ASCII).
+        year: the first publication year is exactly this.
+        author: one of the book's authors has a name containing this text.
+    """
+    conditions = []
+    params = []
+    if title is not None:
+        conditions.append("b.title LIKE ? ESCAPE '\\'")
+        params.append(_like_pattern(title))
+    if year is not None:
+        conditions.append("b.first_publish_year = ?")
+        params.append(year)
+    if author is not None:
+        conditions.append(
+            "EXISTS ("
+            "    SELECT 1 FROM book_authors ba "
+            "    JOIN authors a ON a.author_id = ba.author_id "
+            "    WHERE ba.book_id = b.book_id AND a.name LIKE ? ESCAPE '\\'"
+            ")"
+        )
+        params.append(_like_pattern(author))
+    where = (" WHERE " + " AND ".join(conditions)) if conditions else ""
+    
+    with connect() as conn:
+        book_rows = conn.execute(
+            "SELECT b.book_id, b.title, b.first_publish_year, b.isbn, "
+            "b.open_library_key, b.added_at, "
+            "NOT EXISTS ("
+            "    SELECT 1 FROM loans l "
+            "    WHERE l.book_id = b.book_id AND l.return_date IS NULL"
+            ") AS available "
+            "FROM books b"
+            + where 
+            + " ORDER BY b.title COLLATE NOCASE",
+            params
+        ).fetchall()
+        author_rows = conn.execute(
+            "SELECT ba.book_id, a.name "
+            "FROM book_authors ba "
+            "JOIN authors a ON a.author_id = ba.author_id "
+            "ORDER BY a.name COLLATE NOCASE"
+        ).fetchall()
+
+    authors_by_book = defaultdict(list)
+    for row in author_rows:
+        authors_by_book[row["book_id"]].append(row["name"])
+
+    return [
+        {**dict(row), "authors": authors_by_book[row["book_id"]]} for row in book_rows
+    ]

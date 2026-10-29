@@ -15,11 +15,18 @@
 # Recieve and clearly display error-messeges from API if something goes wrong in the connection with Open Library (no crash).
 # Likewise if something goes wrong when connecting to our database.
 
-import requests
+
+
+import os, requests
+import user_session
+from dotenv import load_dotenv
+
+load_dotenv(".env")
+
+
+api_key = os.getenv("API_KEY")
 
 BASE = "http://127.0.0.1:8000"
-
-
 
 
 def show_books():
@@ -46,7 +53,7 @@ def add_member():
     
     user_input = int(input("Are you sure you want to create a new member? 1) Yes, 0) No: "))
 
-    if user_input == 1: # MAYBE ADD: Checks for typing errors
+    if user_input == 1: # ADD: Checks for typing errors
         try:
             name = str(input("Please type name of the new member: "))
             email = str(input("Please type e-mail of the new member: "))
@@ -57,7 +64,6 @@ def add_member():
     else:
         admin_ui()
 
-
     print(name, email, phone) # EXCHANGE: with something like below when API is online
 '''
     member = {
@@ -66,8 +72,20 @@ def add_member():
     "phone": phone
     }
 
-    result = requests.post(f"{BASE}/members", json=member, timeout=5) # Add key if we should have it
-    return result.status_code
+    response = requests.post(f"{BASE}/members", json=member, timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
+    return response.status_code
+'''
+
+
+def user_login():
+    cardnumber = str(input("Please enter your library card number: ")) 
+    user_session.set_userdata({"cardnumber": cardnumber}) # PLACEHOLDER for show without FastAPI connection
+    print(user_session._userdata, "Welcome!")             # These three lines should be replaced with API query for cardnumber-check
+    return None                                           # If cardnumber and API-Key is correct -> user_session.set_userdata({"cardnumber": cardnumber})
+
+'''
+    member = # query fastAPI requests.get(f"{BASE}/members/", timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
+    
 '''
 
 
@@ -78,34 +96,37 @@ def exit_program():
     exit()
 
 
-
-def admin_ui():     # Do we need some kind of credentials to enter admin UI?
+def admin_ui():
         
     while True:
         try:
             user_input = int(input(f"\nAdministrator functions: \n1) Add book to library\n2) Register new member\n0) Exit to main menu\n"))
         except ValueError:
             print("Please type a single number")
+            continue
 
         if user_input == 1:
             add_book()
         elif user_input == 2:
             add_member()
         elif user_input == 0:
-            main()
+            break
         else:
             print ("\nIncorrect command, try again")
-
 
 
 def main():
     print("Welcome to your local library system!")
 
-    while True:
+    if user_session.is_loggedin() == False:
+        user_login()
+
+    while user_session.is_loggedin() == True:
         try:
             user_input = int(input(f"\nType a single number: \n1) Administrative functions (librarian)\n2) Show books\n3) Borrow book\n4) Return book\n0) Exit program\n"))
         except ValueError:
             print("Please type a single number")
+            continue
 
         if user_input == 1:
             admin_ui()
@@ -119,7 +140,6 @@ def main():
             exit_program()
         else:
             print ("\nIncorrect command, try again")
-
 
 
 if __name__ == "__main__":
