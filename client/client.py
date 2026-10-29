@@ -18,6 +18,7 @@
 
 
 import os, requests
+import user_session
 from dotenv import load_dotenv
 
 load_dotenv(".env")
@@ -26,8 +27,6 @@ load_dotenv(".env")
 api_key = os.getenv("API_KEY")
 
 BASE = "http://127.0.0.1:8000"
-
-credentials = False       # If True the card number has been confirmed with user_login(), starts as False
 
 
 def show_books():
@@ -79,19 +78,17 @@ def add_member():
 
 
 def user_login():
-    cardnumber = str(input("Please enter your library card number: "))
-    print(cardnumber)      # EXCHANGE: with something like below when API is online
-    return True            # EXCHANGE: with something like below when API is online
+    cardnumber = str(input("Please enter your library card number: ")) 
+    user_session.set_userdata({"cardnumber": cardnumber}) # PLACEHOLDER for show without FastAPI connection
+    print(user_session._userdata, "Welcome!")             # These three lines should be replaced with API query for cardnumber-check
+    return None                                           # If cardnumber and API-Key is correct -> user_session.set_userdata({"cardnumber": cardnumber})
 
 '''
-    members = requests.get(f"{BASE}/members/", timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
+    member = # query fastAPI requests.get(f"{BASE}/members/", timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
     
-    if members.raise_for_status() == None:
-        members = members.json()
-        for member in members:
-            if member["card_number"] == cardnumber:
-                print(f"Welcome {member["name"]}")
-                return True
+        if member member.status_code = :
+            print(f"Welcome {member["name"]}")
+            user_session.set_userdata({"cardnumber": cardnumber})
             else:
                 print("Card number not valid")
                 return False
@@ -129,12 +126,10 @@ def admin_ui():
 def main():
     print("Welcome to your local library system!")
 
-    global credentials
+    if user_session.is_loggedin() == False:
+        user_login()
 
-    if credentials == False:
-        credentials = user_login()
-
-    while credentials == True:
+    while user_session.is_loggedin() == True:
         try:
             user_input = int(input(f"\nType a single number: \n1) Administrative functions (librarian)\n2) Show books\n3) Borrow book\n4) Return book\n0) Exit program\n"))
         except ValueError:
