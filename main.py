@@ -1,10 +1,12 @@
 
 from typing import Annotated
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Depends
 
 import database
-from models import BookOut
+from auth import get_current_member
+from models import BookOut, WhoAmIOut
+
 
 app = FastAPI(title="Book Club Library")
 
@@ -16,3 +18,8 @@ def get_books(
     author: Annotated[str | None, Query(description="An author's name contains this text")] = None
     ):
     return database.list_books(title=title, year=year, author=author)
+
+
+@app.get("/whoami", response_model=WhoAmIOut)
+def whoami(member: Annotated[dict, Depends(get_current_member)]):
+    return member

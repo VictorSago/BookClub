@@ -166,3 +166,17 @@ def list_books(
     return [
         {**dict(row), "authors": authors_by_book[row["book_id"]]} for row in book_rows
     ]
+
+
+def find_member_by_card(card_number: str) -> dict | None:
+    """Return the member who owns this card, or None.
+
+    Anonymised members are ignored, so their old cards cannot log in.
+    """
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT member_id, card_number, name FROM members "
+            "WHERE card_number = ? AND anonymised_at IS NULL",
+            (card_number,)
+        ).fetchone()
+    return dict(row) if row is not None else None
