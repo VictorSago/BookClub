@@ -16,7 +16,7 @@ def search_books(title: str, limit: int = 5) -> list[dict]:
 
     params = {
     "title": title.strip(),
-    "limit": 5,
+    "limit": limit,
     "fields": "key,title,author_name,first_publish_year",
 }
 
