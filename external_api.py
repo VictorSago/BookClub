@@ -8,17 +8,17 @@ class OpenLibraryError(Exception):
     """Raised when Open Library cannot provide results."""
 
 
-def search_books(title: str) -> list[dict]:
+def search_books(title: str, limit: int = 5) -> list[dict]:
     """Search Open Library for books by title."""
 
     if not title.strip():
         raise ValueError("Book title cannot be empty.")
 
     params = {
-        "title": title.strip(),
-        "limit": 5,
-        "fields": "key,title,author_name,first_publish_year",
-    }
+    "title": title.strip(),
+    "limit": 5,
+    "fields": "key,title,author_name,first_publish_year",
+}
 
     try:
         response = requests.get(
