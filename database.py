@@ -192,41 +192,27 @@ def find_member_by_card(card_number: str) -> dict | None:
     return dict(row) if row is not None else None
 
 
-def list_member_loans_old(member_id: int) -> list[dict]:
-    """Return the loans of one member, with the book of each loan.
-
-    Loans that are still out come first, then returned loans. Within each
-    group the newest loan comes first.
-
-    Args:
-        member_id: the member whose loans to list.
-        active: filter by loan status. True gives only loans that have not
-            been returned yet, False only returned loans, and None (the
-            default) the whole history.
-
-    Returns:
-        A list of dicts with the keys ``loan_id``, ``loan_date``,
-        ``due_date``, ``return_date`` (None while the book is out),
-        ``overdue`` (True if the book is out and past its due date) and
-        ``book``, a dict in the same shape as the items of ``list_books()``.
-        The list is empty if the member has no matching loans or does not
-        exist.
-    """
-    with connect() as conn:
-        rows = conn.execute(
-            "SELECT l.loan_id, l.book_id, b.title, l.loan_date, l.due_date, "
-            "l.return_date, "
-            "(l.return_date IS NULL "
-            " AND l.due_date < date('now', 'localtime')) AS overdue "
-            "FROM loans l JOIN books b ON b.book_id = l.book_id "
-            "WHERE l.member_id = ? "
-            "ORDER BY l.return_date IS NOT NULL, l.loan_date DESC, l.loan_id DESC",
-            (member_id,)
-        ).fetchall()
-    return [dict(row) for row in rows]
-
 def list_member_loans(member_id: int, *, active: bool | None = None) -> list[dict]:
-    """Return all loans of one member, still-open loans first."""
+    """Return the loans of one member, with the book of each loan 
+        and still-open loans first.
+    
+        Loans that are still out come first, then returned loans. Within each
+        group the newest loan comes first.
+    
+        Args:
+            member_id: the member whose loans to list.
+            active: filter by loan status. True gives only loans that have not
+                been returned yet, False only returned loans, and None (the
+                default) the whole history.
+    
+        Returns:
+            A list of dicts with the keys ``loan_id``, ``loan_date``,
+            ``due_date``, ``return_date`` (None while the book is out),
+            ``overdue`` (True if the book is out and past its due date) and
+            ``book``, a dict in the same shape as the items of ``list_books()``.
+            The list is empty if the member has no matching loans or does not
+            exist.
+        """
     conditions = ["l.member_id = ?"]
     if active is not None:
         conditions.append(
