@@ -56,7 +56,7 @@ def show_books():
     query_string = "?"
     title = input("Type the Title or leave blank:\n").strip()
     author = input("Type the Author or leave blank:\n").strip()
-    year = input("Type Publishing year (ex. 1992) or leave blank:\n").strip()           # Add Marynas input-constrains for int
+    year = input("Type Publishing year (ex. 1992) or leave blank:\n").strip()           # Add input-constrains for int when this is done
 
     if title != "": query_string = query_string + "title=" + title + "&"
     if author != "": query_string = query_string + "author=" + author + "&"
@@ -77,6 +77,8 @@ def show_books():
                 print(f"{author}")
             print(f"Library book id: {book["book_id"]}")
             if book["isbn"] != None: print(f"(ISBN: {book["isbn"]})")
+            if book["available"] == True: print(f"Book is available")
+            else: print(f"Book is not available")
 
             if index % 5 == 0:
                 user_input = input(f"\nPress Enter to show more books or type 0 then press Enter to quit: ")
