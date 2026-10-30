@@ -47,3 +47,16 @@ Tasks:
 - Victor: Reviews, continue with API app
 - Maryna: Reviews and Validation functions, Work with Christofer on UI
 - Christofer: Reviews, continue UI -> Show books
+
+## 2026-10-29
+On yesterday:
+- Loan-service fuction is under testing
+- Show book function soon ready
+- "Who am I" route ready (Information about the user)
+
+
+Tasks:
+Victor: Update contribute documentation for function names + Continue API app(member get routes)
+Mohana: Loan service function
+Maryna: Add book function
+Christofer: Finish up show books function, start on UI login (replace placeholder function)
