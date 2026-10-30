@@ -60,9 +60,9 @@ def get_connection(create: bool = False) -> sqlite3.Connection:
     ``close()`` when done.
 
     Args:
-        create: if True, a missing database file is created (only
-            ``seed.py`` should do this). If False, a missing file is an error,
-            so a mistake does not silently give you an empty database.
+        create: if True, a missing database file is created (only ``seed.py`` 
+            should do this). If False, a missing file is an error, so a 
+            mistake does not silently result in an empty database.
 
     Raises:
         FileNotFoundError: if the file does not exist and ``create`` is False.
@@ -113,7 +113,7 @@ def _like_pattern(text: str) -> str:
 def _select_books(conn, where: str = "", params=()) -> list[dict]:
     """Return books with authors and availability.
 
-    The `where` is a fixed SQL fragment on the alias b (or empty), and params
+    The ``where`` is a fixed SQL fragment on the alias b (or empty), and params
     are its values. Callers pass an open connection.
     """
     book_rows = conn.execute(
@@ -193,7 +193,25 @@ def find_member_by_card(card_number: str) -> dict | None:
 
 
 def list_member_loans_old(member_id: int) -> list[dict]:
-    """Return all loans of one member, still-open loans first."""
+    """Return the loans of one member, with the book of each loan.
+
+    Loans that are still out come first, then returned loans. Within each
+    group the newest loan comes first.
+
+    Args:
+        member_id: the member whose loans to list.
+        active: filter by loan status. True gives only loans that have not
+            been returned yet, False only returned loans, and None (the
+            default) the whole history.
+
+    Returns:
+        A list of dicts with the keys ``loan_id``, ``loan_date``,
+        ``due_date``, ``return_date`` (None while the book is out),
+        ``overdue`` (True if the book is out and past its due date) and
+        ``book``, a dict in the same shape as the items of ``list_books()``.
+        The list is empty if the member has no matching loans or does not
+        exist.
+    """
     with connect() as conn:
         rows = conn.execute(
             "SELECT l.loan_id, l.book_id, b.title, l.loan_date, l.due_date, "
