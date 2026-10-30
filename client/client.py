@@ -17,10 +17,10 @@
 
 
 
-import os, requests
-import user_session
-import input_handlers
+
+import os, requests, json, input_handlers, user_session
 from dotenv import load_dotenv
+
 
 load_dotenv(".env")
 
@@ -30,9 +30,63 @@ api_key = os.getenv("API_KEY")
 BASE = "http://127.0.0.1:8000"
 
 
+def get_json(url, params=None, headers=None, timeout=5):
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=timeout)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.Timeout:
+        print("The search timed out")
+    except requests.exceptions.ConnectionError:
+        print("Could not connect")
+    except requests.exceptions.HTTPError as error:
+        print(f"Server rejection: {error.response.status_code}")
+    except requests.exceptions.JSONDecodeError:
+        print("The answer was not JSON")
+    except requests.exceptions.RequestException as error:
+        print(f"Someting else went wrong: {type(error).__name__}")
+    return None
+
+
+
 def show_books():
-    print("\nShow books:\n")
-    pass
+    print("\nShow books:\n\nYou can search books by Title, Author, Publishing year or any combination.")
+    print("If you do not want to use a specific search criteria you leave it blank.\n\n")
+
+    query_string = "?"
+    title = input("Type the Title or leave blank:\n").strip()
+    author = input("Type the Author or leave blank:\n").strip()
+    year = input("Type Publishing year (ex. 1992) or leave blank:\n").strip()           # Add input-constrains for int when this is done
+
+    if title != "": query_string = query_string + "title=" + title + "&"
+    if author != "": query_string = query_string + "author=" + author + "&"
+    if year != "": query_string = query_string + "year=" + year + "&"
+
+    books = get_json(f"{BASE}/books{query_string}")
+    
+    if books == None: return None   # HTTP failure, get_json() prints reason
+
+    if len(books) == 0:
+        print("No books found")
+        return None
+    else:
+        print(f"We found {len(books)} books:")
+        for index, book in enumerate(books, start=1):
+            print(f"\n{book["title"]} ({book["first_publish_year"]})")
+            for author in book["authors"]:
+                print(f"{author}")
+            print(f"Library book id: {book["book_id"]}")
+            if book["isbn"] != None: print(f"(ISBN: {book["isbn"]})")
+            if book["available"] == True: print(f"Book is available")
+            else: print(f"Book is not available")
+
+            if index % 5 == 0:
+                user_input = input(f"\nPress Enter to show more books or type 0 then press Enter to quit: ")
+                if user_input == "0":
+                    break
+
+    return None
+
 
 def borrow_book():
     print("\nBorrow a book:\n")
@@ -55,9 +109,9 @@ def add_member():
     user_input = input_handlers.get_int_input("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
     if user_input == 1: # ADD: Checks for typing errors - phone number
-        name = input_handlers.get_not_empty_text("Please type name of the new member: ", "Name cannot be empty.")
+        name = input_handlers.get_valid_text("Please type name of the new member: ", "Name cannot be empty.")
         email = input_handlers.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
-        phone = input_handlers.get_not_empty_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
+        phone = input_handlers.get_valid_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
     else:
         return
 
@@ -75,7 +129,7 @@ def add_member():
 
 
 def user_login():
-    cardnumber = input_handlers.get_not_empty_text(
+    cardnumber = input_handlers.get_valid_text(
         "Please enter your library card number: ", # prompt for user input
         "Card number is your personal 12-digit number. Please try again."  #error message for empty input
     )
