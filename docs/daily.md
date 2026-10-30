@@ -34,7 +34,7 @@ Tasks:
 - Christofer: UI Draft login function
 - Mohana: External API for Open Library
 
-## 2026-10-28
+## 2026-10-29
 On yesterday:
 - Built on external API, tested and works, needs review
 - Validation functions created, empty string, check format, check so that date is in future, check date range
@@ -48,7 +48,7 @@ Tasks:
 - Maryna: Reviews and Validation functions, Work with Christofer on UI
 - Christofer: Reviews, continue UI -> Show books
 
-## 2026-10-29
+## 2026-10-30
 On yesterday:
 - Loan-service fuction is under testing
 - Show book function soon ready
@@ -56,7 +56,7 @@ On yesterday:
 
 
 Tasks:
-Victor: Update contribute documentation for function names + Continue API app(member get routes)
-Mohana: Loan service function
-Maryna: Add book function
-Christofer: Finish up show books function, start on UI login (replace placeholder function)
+- Victor: Update contribute documentation for function names + Continue API app(member get routes)
+- Mohana: Loan service function
+- Maryna: Add book function
+- Christofer: Finish up show books function, start on UI login (replace placeholder function)
