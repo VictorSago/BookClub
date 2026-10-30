@@ -18,7 +18,7 @@
 
 
 
-import os, requests, json
+import os, requests, json, input_handlers, user_session
 from dotenv import load_dotenv
 
 
@@ -107,9 +107,9 @@ def add_member():
     user_input = input_handlers.get_int_input("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
     if user_input == 1: # ADD: Checks for typing errors - phone number
-        name = input_handlers.get_not_empty_text("Please type name of the new member: ", "Name cannot be empty.")
+        name = input_handlers.get_valid_text("Please type name of the new member: ", "Name cannot be empty.")
         email = input_handlers.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
-        phone = input_handlers.get_not_empty_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
+        phone = input_handlers.get_valid_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
     else:
         return
 
@@ -127,7 +127,7 @@ def add_member():
 
 
 def user_login():
-    cardnumber = input_handlers.get_not_empty_text(
+    cardnumber = input_handlers.get_valid_text(
         "Please enter your library card number: ", # prompt for user input
         "Card number is your personal 12-digit number. Please try again."  #error message for empty input
     )
