@@ -54,13 +54,13 @@ def show_books():
     print("If you do not want to use a specific search criteria you leave it blank.\n\n")
 
     query_string = "?"
-    title = input("Type the Title or leave blank:\n").strip()
-    author = input("Type the Author or leave blank:\n").strip()
-    year = input("Type Publishing year (ex. 1992) or leave blank:\n").strip()           # Add input-constrains for int when this is done
+    title = input_handlers.get_valid_text("Type the Title or leave blank:\n", can_be_empty=True)
+    author = input_handlers.get_valid_text("Type the Author or leave blank:\n", can_be_empty=True)
+    year = input_handlers.get_valid_int("Type Publishing year (ex. 1992) or leave blank:\n", can_be_empty=True)
 
-    if title != "": query_string = query_string + "title=" + title + "&"
-    if author != "": query_string = query_string + "author=" + author + "&"
-    if year != "": query_string = query_string + "year=" + year + "&"
+    if title: query_string = query_string + "title=" + title + "&"
+    if author: query_string = query_string + "author=" + author + "&"
+    if year is not None: query_string = query_string + "year=" + str(year) + "&"
 
     books = get_json(f"{BASE}/books{query_string}")
     
@@ -106,7 +106,7 @@ def add_member():
     email = ""
     phone = ""
     
-    user_input = input_handlers.get_int_input("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
+    user_input = input_handlers.get_int_range("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
     if user_input == 1: # ADD: Checks for typing errors - phone number
         name = input_handlers.get_valid_text("Please type name of the new member: ", "Name cannot be empty.")
@@ -152,7 +152,7 @@ def exit_program():
 
 def admin_ui():
     while True:
-        user_input = input_handlers.get_int_input(
+        user_input = input_handlers.get_int_range(
             f"\nAdministrator functions: \n1) Add book to library\n2) Register new member\n0) Exit to main menu\n",
             0, 2
         )
@@ -172,7 +172,7 @@ def main():
         user_login()
 
     while user_session.is_loggedin() == True:
-        user_input = input_handlers.get_int_input(
+        user_input = input_handlers.get_int_range(
             f"\nType a single number: \n1) Administrative functions (librarian)\n2) Show books\n3) Borrow book\n4) Return book\n0) Exit program\n",
             0, 4
         )
