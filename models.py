@@ -1,6 +1,8 @@
 
 from pydantic import BaseModel
 
+from typing import Literal
+
 
 class BookOut(BaseModel):
     book_id: int
@@ -11,3 +13,9 @@ class BookOut(BaseModel):
     added_at: str
     authors: list[str]
     available: bool
+
+
+class WhoAmIOut(BaseModel):
+    role: Literal["member", "librarian"]
+    member_id: int
+    name: str
