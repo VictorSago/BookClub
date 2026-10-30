@@ -10,11 +10,13 @@ def get_valid_text(
     error_message: str = "Input cannot be empty. Please try again.",
     can_be_empty: bool = False,
 ) -> str:
-    """Prompt the user for input repeatedly until non-empty text is entered.
+    """Prompt the user for text input, optionally allowing empty input.
 
     Args:
         prompt (str): Text prompt displayed to the user.
-        error_message (str): Message shown when the user submits an empty string.
+        error_message (str): Message shown when the user submits an empty string
+            and empty input is not permitted. Defaults to
+            "Input cannot be empty. Please try again.".
         can_be_empty (bool): If True, allows returning an empty string without
             validation errors. Defaults to False.
 
@@ -28,39 +30,63 @@ def get_valid_text(
         print(error_message)
 
 
-def get_int_input(
+def get_valid_int(
     prompt: str,
-    min_value: int | None = None,
-    max_value: int | None = None,
-) -> int:
-    """Prompt the user for an integer, optionally bounded by an inclusive range.
+    error_message: str = "Please enter a valid integer.",
+    can_be_empty: bool = False
+) -> int | None:
+    """Prompt the user for an integer, optionally allowing empty input.
 
     Args:
         prompt (str): Text prompt displayed to the user.
-        min_value (int | None): Minimum acceptable value (inclusive). Defaults to None.
-        max_value (int | None): Maximum acceptable value (inclusive). Defaults to None.
+        error_message (str): Message shown when input is invalid or empty
+            when empty input is not permitted. Defaults to "Please enter a valid integer.".
+        can_be_empty (bool): If True, allows submitting empty input and returns None.
+            Defaults to False.
 
     Returns:
-        int: Validated integer adhering to specified bounds.
+        int | None: Parsed integer, or None if input was empty and can_be_empty is True.
     """
     while True:
         user_input = input(prompt).strip()
 
+        if not user_input:
+            if can_be_empty:
+                return None
+            print(error_message)
+            continue
+
         try:
-            value = int(user_input)
+            return int(user_input)
         except ValueError:
-            print("Please enter a valid integer")
+            print(error_message)
+
+
+def get_int_range(
+    prompt: str,
+    min_value: int,
+    max_value: int,
+) -> int:
+    """Prompt the user for an integer within an inclusive range.
+
+    Args:
+        prompt (str): Text prompt displayed to the user.
+        min_value (int): Minimum acceptable value (inclusive).
+        max_value (int): Maximum acceptable value (inclusive).
+
+    Returns:
+        int: Validated integer within [min_value, max_value].
+    """
+    range_error_message = f"Please enter a number between {min_value} and {max_value}."
+    
+    while True:
+        user_input = get_valid_int(prompt)
+
+        if not (min_value <= user_input <= max_value):
+            print(range_error_message)
             continue
 
-        if min_value is not None and value < min_value:
-            print(f"Please enter a number greater than or equal to {min_value}.")
-            continue
-
-        if max_value is not None and value > max_value:
-            print(f"Please enter a number less than or equal to {max_value}.")
-            continue
-
-        return value
+        return user_input
 
 
 def is_valid_email(email: str) -> bool:
