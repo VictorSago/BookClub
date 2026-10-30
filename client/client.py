@@ -17,10 +17,10 @@
 
 
 
-import os, requests
-import user_session
-import input_handlers
+
+import os, requests, json
 from dotenv import load_dotenv
+
 
 load_dotenv(".env")
 
@@ -30,9 +30,61 @@ api_key = os.getenv("API_KEY")
 BASE = "http://127.0.0.1:8000"
 
 
+def get_json(url, params=None, headers=None, timeout=5):
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=timeout)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.Timeout:
+        print("The search timed out")
+    except requests.exceptions.ConnectionError:
+        print("Could not connect")
+    except requests.exceptions.HTTPError as error:
+        print(f"Server rejection: {error.response.status_code}")
+    except requests.exceptions.JSONDecodeError:
+        print("The answer was not JSON")
+    except requests.exceptions.RequestException as error:
+        print(f"Someting else went wrong: {type(error).__name__}")
+    return None
+
+
+
 def show_books():
-    print("\nShow books:\n")
-    pass
+    print("\nShow books:\n\nYou can search books by Title, Author, Publishing year or any combination.")
+    print("If you do not want to use a specific search criteria you leave it blank.\n\n")
+
+    query_string = "?"
+    title = input("Type the Title or leave blank:\n").strip()
+    author = input("Type the Author or leave blank:\n").strip()
+    year = input("Type Publishing year (ex. 1992) or leave blank:\n").strip()           # Add Marynas input-constrains for int
+
+    if title != "": query_string = query_string + "title=" + title + "&"
+    if author != "": query_string = query_string + "author=" + author + "&"
+    if year != "": query_string = query_string + "year=" + year + "&"
+
+    books = get_json(f"{BASE}/books{query_string}")
+    
+    if books == None: return None   # HTTP failure, get_json() prints reason
+
+    if len(books) == 0:
+        print("No books found")
+        return None
+    else:
+        print(f"We found {len(books)} books:")
+        for index, book in enumerate(books, start=1):
+            print(f"\n{book["title"]} ({book["first_publish_year"]})")
+            for author in book["authors"]:
+                print(f"{author}")
+            print(f"Library book id: {book["book_id"]}")
+            if book["isbn"] != None: print(f"(ISBN: {book["isbn"]})")
+
+            if index % 5 == 0:
+                user_input = input(f"\nPress Enter to show more books or type 0 then press Enter to quit: ")
+                if user_input == "0":
+                    break
+
+    return None
+
 
 def borrow_book():
     print("\nBorrow a book:\n")
