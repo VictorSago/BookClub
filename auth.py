@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyHeader
 
-import database
+from core import database
 
 load_dotenv()
 
@@ -67,3 +67,7 @@ def require_librarian(member: Annotated[dict, Depends(get_current_member)]) -> d
     if member["role"] != "librarian":
         raise HTTPException(status_code=403, detail="Librarian access required")
     return member
+
+
+CurrentMember = Annotated[dict, Depends(get_current_member)]
+CurrentLibrarian = Annotated[dict, Depends(require_librarian)]

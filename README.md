@@ -19,13 +19,15 @@ _A short description of project organization_
 BookClub/
 ├── main.py
 ├── client.py
+├── auth.py
 ├── core/
 │   ├── __init__.py
 │   ├── database.py
 │   ├── models.py
 │   ├── schema.sql
 │   ├── seed.py
-│   └── external_api.py
+│   ├── external_api.py
+│   └── library.db
 ├── cli/
 │   ├── constants.py
 │   ├── input_handlers.py
@@ -54,7 +56,7 @@ _Explanations_ and _links_.
 - Python 3.10 or newer, because of the type hints.
 - Install `requirements.txt`.
 - Copy `.env.example` to `.env` and set `API_KEY`. `.env` is ignored by Git, and each person keeps their own copy, shared privately.
-- `python seed.py` builds `library.db` from `schema.sql` and fills it with test data. It refuses to run if the file exists. To reset: `rm library.db && python seed.py`.
+- `python -m core.seed` builds `library.db` from `schema.sql` and fills it with test data. It refuses to run if the file exists. To reset: `rm library.db && python -m core.seed`.
 - Run `fastapi dev main.py` in one terminal and `client.py` in another, and use `/docs` for manual testing.
 - Seed prints test member cards on each run. The `LIBRARY_DB` variable (set in the shell, not in `.env`) points to another database file.
 - `database.py` never creates tables.
