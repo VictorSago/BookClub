@@ -16,32 +16,15 @@ from database import connect, list_books
 
 DEFAULT_LOAN_DAYS = 21
 
-
-class LoanError(Exception):
-    """Base class for expected borrowing business-rule failures."""
-
-
-class BookNotFoundError(LoanError):
-    """The requested book is not in the local library."""
-
-
-class BookUnavailableError(LoanError):
-    """The requested physical book already has an active loan."""
-
-
-class InvalidLoanRequestError(LoanError):
-    """Invalid loan data or member eligibility."""
-
-
 def _positive_id(value: int, label: str) -> None:
     if type(value) is not int or value <= 0:
-        raise InvalidLoanRequestError(f"{label} must be a positive integer.")
+        raise ValueError(f"{label} must be a positive integer.")
 
 
 def find_books(title: str) -> list[dict]:
     """Search locally owned books; results include their availability."""
     if not isinstance(title, str) or not title.strip():
-        raise InvalidLoanRequestError("Enter a book title.")
+        raise ValueError("Enter a book title.")
     return list_books(title=title.strip())
 
 
@@ -57,7 +40,7 @@ def check_book_available(book_id: int) -> dict:
             "SELECT book_id, title FROM books WHERE book_id = ?", (book_id,)
         ).fetchone()
         if book is None:
-            raise BookNotFoundError(f"Book {book_id} was not found in our library.")
+            raise LookupError(f"Book {book_id} was not found in our library.")
         active = conn.execute(
             "SELECT 1 FROM loans WHERE book_id = ? AND return_date IS NULL",
             (book_id,),
@@ -75,14 +58,14 @@ def validate_loan_dates(loan_date: str, due_date: str) -> tuple[str, str]:
         start = date.fromisoformat(loan_date)
         due = date.fromisoformat(due_date)
     except (TypeError, ValueError) as exc:
-        raise InvalidLoanRequestError("Dates must use YYYY-MM-DD format.") from exc
+        raise ValueError("Dates must use YYYY-MM-DD format.") from exc
 
     if start.isoformat() != loan_date or due.isoformat() != due_date:
-        raise InvalidLoanRequestError("Dates must use YYYY-MM-DD format.")
+        raise ValueError("Dates must use YYYY-MM-DD format.")
     if start != date.today():
-        raise InvalidLoanRequestError("Borrowing must start today.")
+        raise ValueError("Borrowing must start today.")
     if due <= start:
-        raise InvalidLoanRequestError("Due date must be after the loan date.")
+        raise ValueError("Due date must be after the loan date.")
     return start.isoformat(), due.isoformat()
 
 
@@ -97,7 +80,7 @@ def borrow_book(
     """Create a loan after the client has confirmed and the API authenticated.
 
     Returns a dict with loan_id, member_id, book_id, loan_date and due_date.
-    Raises LoanError subclasses for expected borrowing-rule failures.
+    Raises ValueError or LookupError for expected borrowing-rule failures.
     """
     _positive_id(member_id, "Member ID")
     _positive_id(book_id, "Book ID")
@@ -118,20 +101,20 @@ def borrow_book(
             (member_id,),
         ).fetchone()
         if member is None or member["anonymised_at"] is not None:
-            raise InvalidLoanRequestError("Member is not eligible to borrow books.")
+            raise ValueError("Member is not eligible to borrow books.")
 
         book = conn.execute(
             "SELECT book_id FROM books WHERE book_id = ?", (book_id,)
         ).fetchone()
         if book is None:
-            raise BookNotFoundError(f"Book {book_id} was not found in our library.")
+            raise LookupError(f"Book {book_id} was not found in our library.")
 
         active = conn.execute(
             "SELECT 1 FROM loans WHERE book_id = ? AND return_date IS NULL",
             (book_id,),
         ).fetchone()
         if active is not None:
-            raise BookUnavailableError(f"Book {book_id} is currently on loan.")
+            raise ValueError(f"Book {book_id} is currently on loan.")
 
         try:
             cursor = conn.execute(
@@ -141,10 +124,10 @@ def borrow_book(
             )
         except sqlite3.IntegrityError as exc:
             if "UNIQUE constraint failed: loans.book_id" in str(exc):
-                raise BookUnavailableError(
+                raise ValueError(
                     f"Book {book_id} is currently on loan."
                 ) from exc
-            raise InvalidLoanRequestError(
+            raise ValueError(
                 "The loan could not be saved because it violates a database rule."
             ) from exc
 
