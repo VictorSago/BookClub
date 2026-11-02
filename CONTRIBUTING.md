@@ -25,7 +25,7 @@ We strictly follow **PEP 8**. We use automated tools to enforce consistency:
 
 + **Linter & Formatter:** Use `ruff` (or `black` and `flake8`).
 + **Line Length:** Maximum 88 characters.
-+ Run checks before committing:
++ Run checks before committing. For example, with `ruff`:
 
   ```bash
   ruff check .
@@ -49,6 +49,7 @@ def borrow_book(member_id: int, book_id: int) -> bool:
         BookNotAvailableError: If the book is currently borrowed or reserved.
         MemberLimitExceededError: If the member has reached the borrowing limit.
     """
+    ...
 ```
 
 ---
@@ -57,19 +58,21 @@ def borrow_book(member_id: int, book_id: int) -> bool:
 
 ### 3.1 Branch Naming Conventions
 
-All branch names must follow this structure: <category>_<issue-id>-<short-description>:
-feature_ — New feature or user story (e.g., feature_12-show-available-books)
-bugfix_ — Bug fix or defect resolution (e.g., bugfix_34-fix-loan-date-calculation)
-hotfix_ — Urgent critical production fix (e.g., hotfix_55-security-patch)
-refactor_ — Code refactoring without changing functionality (e.g., refactor_18-database-queries)
-docs_ — Documentation updates (e.g., docs_2-update-contributing-guide)
+All branch names must follow this structure: `<category>_<issue-id>-<short-description>`:
+
++ `feature_` — New feature or user story (e.g., `feature_12-show-available-books`)
++ `bugfix_` — Bug fix or defect resolution (e.g., `bugfix_34-fix-loan-date-calculation`)
++ `hotfix_` — Urgent critical production fix (e.g., `hotfix_55-security-patch`)
++ `refactor_` — Code refactoring without changing functionality (e.g., `refactor_18-database-queries`)
++ `docs_` — Documentation updates (e.g., `docs_2-update-contributing-guide`)
 
 ### 3.2 Commit Messages
 
-Write clear commit messages in English using the imperative mood:
-feat: add filter for available books in catalog
-fix: prevent duplicate loans for identical book ids
-test: add unit tests for member loan limits
+Write clear commit messages in English using the imperative mood. For example:
+
++ `feat: add filter for available books in catalog`
++ `fix: prevent duplicate loans for identical book ids`
++ `test: add unit tests for member loan limits`
 
 ---
 
@@ -77,21 +80,26 @@ test: add unit tests for member loan limits
 
 ### 4.1 Submitting a Pull Request (PR Author)
 
-Self-Review: Perform a self-review of your changes before asking for peer review. Remove debug statements, dead code, and commented blocks.
-PR Description:
-Reference the related user story or issue (e.g., Closes #12).
-Summarize the changes and specify how acceptance criteria were met.
-Provide concrete steps for manual testing and verification.
+**Self-Review:** Perform a self-review of your changes before asking for peer review. Remove debug statements, dead code, and commented blocks.
+
+**PR Description:**
+
++ Reference the related user story or issue (e.g., `Closes #12`).
++ Summarize the changes and specify how acceptance criteria were met.
++ Provide concrete steps for manual testing and verification.
 
 ### 4.2 Reviewing a Pull Request (Reviewer)
 
-Focus Areas:
-Adherence to acceptance criteria and the Definition of Done.
-Code clarity, maintainability, and alignment with PEP 8.
-Security considerations.
-Feedback Tone:
-Provide constructive, actionable comments with clear explanations.
-Prefix non-blocking recommendations with nit: (e.g., nit: consider renaming variable for clarity).
+**Focus Areas:**
+
++ Adherence to acceptance criteria and the Definition of Done.
++ Code clarity, maintainability, and alignment with PEP 8.
++ Security considerations.
+
+**Feedback Tone:**
+
+Provide constructive, actionable comments with clear explanations.  
+Prefix non-blocking recommendations with `nit:` (e.g., `nit: consider renaming variable for clarity`).
 
 ### 4.3 Merging
 
