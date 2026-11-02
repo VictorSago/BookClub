@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 
-from constants import DATE_FORMAT, DATE_FORMAT_DISPLAY
+from cli.constants import DATE_FORMAT, DATE_FORMAT_DISPLAY
 
 
 def get_valid_text(
