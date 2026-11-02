@@ -110,6 +110,12 @@ def _like_pattern(text: str) -> str:
     return "%" + escaped + "%"
 
 
+_ON_LOAN = (
+    "EXISTS (SELECT 1 FROM loans l "
+    "WHERE l.book_id = b.book_id AND l.return_date IS NULL)"
+)
+
+
 def _select_books(conn, where: str = "", params=()) -> list[dict]:
     """Return books with authors and availability.
 
@@ -119,10 +125,7 @@ def _select_books(conn, where: str = "", params=()) -> list[dict]:
     book_rows = conn.execute(
         "SELECT b.book_id, b.title, b.first_publish_year, b.isbn, "
         "b.open_library_key, b.added_at, "
-        "NOT EXISTS ("
-        "    SELECT 1 FROM loans l "
-        "    WHERE l.book_id = b.book_id AND l.return_date IS NULL"
-        ") AS available "
+        "NOT " + _ON_LOAN + " AS available "
         "FROM books b" 
         + where 
         + " ORDER BY b.title COLLATE NOCASE",
@@ -146,7 +149,11 @@ def _select_books(conn, where: str = "", params=()) -> list[dict]:
 
 
 def list_books(
-    *, title: str | None = None, year: int | None = None, author: str | None
+    *, 
+    title: str | None = None, 
+    year: int | None = None, 
+    author: str | None = None, 
+    available: bool | None = None
     ) -> list[dict]:
     """Return books, each with a list of its author names.
 
@@ -154,6 +161,8 @@ def list_books(
         title: the title contains this text (case-insensitive for ASCII).
         year: the first publication year is exactly this.
         author: one of the book's authors has a name containing this text.
+        available: True gives only books that are not on loan, False only
+            books that are.
     """
     conditions = []
     params = []
@@ -172,6 +181,8 @@ def list_books(
             ")"
         )
         params.append(_like_pattern(author))
+    if available is not None:
+        conditions.append(("NOT " + _ON_LOAN) if available else _ON_LOAN)
     where = (" WHERE " + " AND ".join(conditions)) if conditions else ""
     
     with connect() as conn:

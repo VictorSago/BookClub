@@ -15,9 +15,13 @@ app = FastAPI(title="Book Club Library")
 def get_books(
     title: Annotated[str | None, Query(description="Title contains this text")] = None,
     year: Annotated[int | None, Query(description="First publication year")] = None,
-    author: Annotated[str | None, Query(description="An author's name contains this text")] = None
+    author: Annotated[str | None, Query(description="An author's name contains this text")] = None,
+    available: Annotated[
+        bool | None, 
+        Query(description="True: only books in the library. False: only books on loan")
+        ] = None
     ):
-    return database.list_books(title=title, year=year, author=author)
+    return database.list_books(title=title, year=year, author=author, available=available)
 
 
 @app.get("/whoami", response_model=WhoAmIOut)
