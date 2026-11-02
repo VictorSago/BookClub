@@ -31,5 +31,5 @@ def user_login(get_json_func, base_url):
             print("Login failed. Please check your card number and API key.")
         else:
             user_session.set_userdata(member)
-            print(f"Login successful. Welcome {member.get('name')}!")
+            print(f"\nLogin successful. Welcome {member.get('name')}!\nYou are logged in as a {member.get('role')}")
             break
