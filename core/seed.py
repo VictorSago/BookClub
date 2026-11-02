@@ -1,7 +1,7 @@
 """Build library.db from schema.sql and fill it with test data.
 
 Usage:
-    python seed.py
+    python -m core.seed
 
 If library.db already exists, delete it first and run this script again.
 """
@@ -11,7 +11,7 @@ import secrets
 from pathlib import Path
 from datetime import date, timedelta
 import sqlite3
-from database import DB_PATH, connect, new_card_number
+from core.database import DB_PATH, connect, new_card_number
 
 
 BASE_DIR = Path(__file__).parent

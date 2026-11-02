@@ -6,6 +6,9 @@ __pycache__/
 .venv/
 venv/
 
+# Linters
+.ruff_cache/
+
 # IDE specific
 .vscode/
 .idea/
@@ -17,7 +20,15 @@ venv/
 # Environment variables
 .env
 
-# OS Temporary Files
+# Log files
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary Files and backups
+temp/
 *.temp
 *.tmp
- 
+*.bak
