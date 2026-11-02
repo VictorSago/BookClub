@@ -268,6 +268,9 @@ def borrow_book(member_id: int, book_id: int) -> dict | None:
     Raises:
         RuleViolation: if the member is anonymised or the book is already
             on loan.
+    
+    Authors:
+        Mohana Muruganandham, Victor Sago.
     """
     today = date.today()
     due = today + timedelta(days=LOAN_DAYS)
