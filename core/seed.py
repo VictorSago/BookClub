@@ -11,7 +11,7 @@ import secrets
 from pathlib import Path
 from datetime import date, timedelta
 import sqlite3
-from core.database import DB_PATH, connect, new_card_number
+from database import DB_PATH, connect, new_card_number
 
 
 BASE_DIR = Path(__file__).parent
