@@ -36,6 +36,7 @@ import sqlite3
 from collections import defaultdict
 from collections.abc import Generator
 from contextlib import contextmanager
+from datetime import date, timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -45,6 +46,16 @@ DB_PATH = Path(os.environ.get("LIBRARY_DB", DEFAULT_DB))
 
 CARD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890"
 CARD_LENGTH = 12
+
+LOAN_DAYS = 21  # Keep in sync with the default loan length in the API.
+
+
+class RuleViolation(Exception):
+    """Raised when a request breaks a library rule.
+
+    The message is meant for the user, for example "This book is already
+    on loan." The API turns it into a 409 response.
+    """
 
 
 def new_card_number() -> str:
@@ -242,6 +253,57 @@ def list_member_loans(member_id: int, *, active: bool | None = None) -> list[dic
         loan["book"] = by_id[loan.pop("book_id")]
         loans.append(loan)
     return loans
+
+
+def borrow_book(member_id: int, book_id: int) -> dict | None:
+    """Lend a book to a member and return the new loan, or None.
+
+    The loan date is today and the due date is ``LOAN_DAYS`` later. The
+    caller cannot choose either.
+
+    Returns:
+        The loan as a dict in the shape of the items of
+        ``list_member_loans()``, or None if the book does not exist.
+
+    Raises:
+        RuleViolation: if the member is anonymised or the book is already
+            on loan.
+    """
+    today = date.today()
+    due = today + timedelta(days=LOAN_DAYS)
+    with connect() as conn:
+        # Take the write lock first, so that checking availability and
+        # inserting the loan cannot be interleaved with another request.
+        conn.execute("BEGIN IMMEDIATE")
+        member = conn.execute(
+            "SELECT 1 FROM members WHERE member_id = ? AND anonymised_at IS NULL",
+            (member_id,)
+        ).fetchone()
+        if member is None:
+            raise RuleViolation("This member account cannot borrow books.")
+        books = _select_books(conn, " WHERE b.book_id = ?", (book_id,))
+        if not books:
+            return None
+        book = books[0]
+        if not book["available"]:
+            raise RuleViolation("This book is already on loan.")
+        cursor = conn.execute(
+            "INSERT INTO loans (member_id, book_id, loan_date, due_date) "
+            "VALUES (?, ?, ?, ?)",
+            (member_id, book_id, today.isoformat(), due.isoformat())
+        )
+        loan_id = cursor.lastrowid
+        if loan_id is None:
+            raise RuntimeError("Inserting the loan did not create a row.")
+    book["available"] = False
+    return {
+        "loan_id": loan_id,
+        "loan_date": today.isoformat(),
+        "due_date": due.isoformat(),
+        "return_date": None,
+        "overdue": False,
+        "book": book,
+    }
 
 
 def get_member_data(member_id: int) -> dict | None:
