@@ -13,7 +13,7 @@
 | Who | Method and path | Success | Story | Status |
 | --- | --- | --- | --- | --- |
 | anyone | GET /books?title=&author=&year=&available= | 200 | Show and search books | Done |
-| anyone | GET /books/{book_id} | 200 | Book availability | In Progress |
+| anyone | GET /books/{book_id} | 200 | Book availability | Done |
 | anyone | GET /whoami | 200 | Authenticate and authorize a user | Done |
 | librarian | POST /books | 201 | Add a book by hand | Planned |
 | librarian | POST /books/import | 201 | Add a book from Open Library | Planned |
@@ -28,8 +28,8 @@
 | librarian | GET /stats/most-borrowed | 200 | Most borrowed | Planned |
 | librarian | GET /stats/never-borrowed | 200 | Never borrowed | Planned |
 | member | GET /me/loans | 200 | My borrowed books | Done |
-| member | POST /me/loans (body: book_id) | 201 | Borrow | Planned |
-| member | POST /me/loans/{loan_id}/return | 200 | Return | Planned |
+| member | POST /me/loans (body: book_id) | 201 | Borrow | Done |
+| member | POST /me/loans/{loan_id}/return | 200 | Return | Done |
 | member | GET /me/data | 200 | What do you have about me? | Done |
 | member | DELETE /me | 204 | Delete me (anonymise) | Planned |
 
