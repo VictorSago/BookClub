@@ -189,6 +189,13 @@ def list_books(
         return _select_books(conn, where, params)
 
 
+def get_book_by_id(book_id: int) -> dict | None:
+    """Return one book with its authors and availability, or None."""
+    with connect() as conn:
+        books = _select_books(conn, " WHERE b.book_id = ?", (book_id,))
+    return books[0] if books else None
+
+
 def find_member_by_card(card_number: str) -> dict | None:
     """Return the member who owns this card, or None.
 

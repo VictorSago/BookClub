@@ -1,7 +1,7 @@
 
 from typing import Annotated
 
-from fastapi import FastAPI, Query, Depends, HTTPException
+from fastapi import FastAPI, Query, HTTPException
 
 from core import database
 from auth import CurrentMember, CurrentLibrarian
@@ -22,6 +22,14 @@ def get_books(
         ] = None
     ):
     return database.list_books(title=title, year=year, author=author, available=available)
+
+
+@app.get("/books/{book_id}", response_model=BookOut)
+def get_book(book_id: int):
+    book = database.get_book_by_id(book_id)
+    if book is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return book
 
 
 @app.get("/whoami", response_model=WhoAmIOut)
