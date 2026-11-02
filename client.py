@@ -22,7 +22,7 @@ import os, requests, json
 from dotenv import load_dotenv
 
 from cli.constants import MAIN_MENU_TEXT
-from cli import input_handlers, user_session
+from cli import input_handlers, user_session, login_service
 from cli.ui_menu import (
     show_books,
     borrow_book,
@@ -63,7 +63,7 @@ def main():
     print("Welcome to your local library system!")
 
     if user_session.is_loggedin() == False:
-        user_login()
+        login_service.user_login(get_json, BASE)
 
     while user_session.is_loggedin() == True:
         user_input = input_handlers.get_int_range(
