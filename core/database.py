@@ -327,6 +327,47 @@ def borrow_book(member_id: int, book_id: int) -> dict | None:
     }
 
 
+def return_book(member_id: int, loan_id: int) -> dict | None:
+    """Mark one of the member's loans as returned today and return it.
+
+    Returns:
+        The loan as a dict in the shape of the items of
+        ``list_member_loans()``, or None if there is no such loan or it
+        belongs to another member.
+
+    Raises:
+        RuleViolation: if the loan has already been returned.
+    """
+    today = date.today().isoformat()
+    with connect() as conn:
+        # Take the write lock first, so two requests cannot both return
+        # the same loan.
+        conn.execute("BEGIN IMMEDIATE")
+        row = conn.execute(
+            "SELECT loan_id, book_id, loan_date, due_date, return_date "
+            "FROM loans WHERE loan_id = ? AND member_id = ?",
+            (loan_id, member_id)
+        ).fetchone()
+        if row is None:
+            return None
+        if row["return_date"] is not None:
+            raise RuleViolation("This book has already been returned.")
+        conn.execute(
+            "UPDATE loans SET return_date = ? WHERE loan_id = ?",
+            (today, loan_id)
+        )
+        # Read the book after the update, so ``available`` is already True.
+        book = _select_books(conn, " WHERE b.book_id = ?", (row["book_id"],))[0]
+    return {
+        "loan_id": row["loan_id"],
+        "loan_date": row["loan_date"],
+        "due_date": row["due_date"],
+        "return_date": today,
+        "overdue": False,
+        "book": book,
+    }
+
+
 def get_member_data(member_id: int) -> dict | None:
     """Return everything stored about a member, with their loans, or None."""
     with connect() as conn:
