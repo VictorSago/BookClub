@@ -27,9 +27,15 @@ def user_login(get_json_func, base_url):
                             headers={"X-API-Key": api_key, "X-Card-Number": cardnumber}, 
                             timeout=5)
 
-        if member == None:
+        if member == None:  
             print("Login failed. Please check your card number and API key.")
         else:
             user_session.set_userdata(member)
             print(f"\nLogin successful. Welcome {member.get('name')}!\nYou are logged in as a {member.get('role')}")
             break
+
+
+def user_logout():
+    user_session.set_userdata(None)
+    print("You have been logged out.")
+    return None
