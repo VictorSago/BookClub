@@ -27,7 +27,6 @@ from cli.ui_menu import (
     show_books,
     borrow_book,
     return_book,
-    user_login,
     admin_ui,
     exit_program,
 )
