@@ -1,6 +1,6 @@
+import requests
 from cli.constants import MAIN_MENU_TEXT, ADMIN_MENU_TEXT
 from cli import input_handlers, user_session, login_service
-from client import api_key, BASE, requests
 
 
 def show_books(get_json_func, base_url):
@@ -69,18 +69,24 @@ def add_member():
     else:
         return
 
-    print(name, email, phone) # EXCHANGE: with something like below when API is online
+    print(user_session.get_userdata()) # EXCHANGE: with something like below when API is online
 
+'''
     member = {
     "name": name,
     "email": email,
     "phone": phone
     }
 
-    response = requests.post(f"{BASE}/members", json=member, timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
+    response = requests.post(f"{login_service.BASE}/members", 
+                             json=member, 
+                             timeout=5, 
+                             headers={"X-API-Key": login_service.api_key, 
+                                      "X-Card-Number": user_session.get_userdata().get("cardnumber")}) # CHECK: that setup matches our API
     return response.status_code
+'''
 
-# POST /members | 201 | Register a member |
+
 
 def exit_program():
     # Shutdown sequence
