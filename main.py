@@ -23,7 +23,6 @@ def get_books(
     ):
     return database.list_books(title=title, year=year, author=author, available=available)
 
-
 @app.get("/books/{book_id}", response_model=BookOut)
 def get_book(book_id: int):
     book = database.get_book_by_id(book_id)
@@ -31,11 +30,9 @@ def get_book(book_id: int):
         raise HTTPException(status_code=404, detail="Book not found")
     return book
 
-
 @app.get("/whoami", response_model=WhoAmIOut)
 def whoami(member: CurrentMember):
     return member
-
 
 @app.get("/me/loans", response_model=list[LoanOut])
 def get_my_loans(
