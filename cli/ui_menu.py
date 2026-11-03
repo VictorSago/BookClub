@@ -91,11 +91,15 @@ def add_book(post_json_func, base_url: str, api_key: str | None = None, card_num
         if status_code == 201 and result:
             print(f"\nSuccess! Added new book '{result['title']}' (ID: {result['book_id']}).")
             break
-        elif status_code == 200 and result:
-            print(f"\nBook '{result['title']}' (ID: {result['book_id']}) already exists in the library catalog.")
+        elif status_code == 409:
+            # error message already printed inside post_json
             break
+        elif status_code == 404:
+            # error message already printed inside post_json
+            retry = input("\nWould you like to try another ISBN? (y/n): ").strip().lower()
+            if retry != "y":
+                break
         else:
-            # Prompt user to retry on failure
             retry = input("\nWould you like to try another ISBN? (y/n): ").strip().lower()
             if retry != "y":
                 break

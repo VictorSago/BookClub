@@ -66,11 +66,19 @@ def post_json(url: str, json_data: dict, headers: dict | None = None, timeout: i
         if response.status_code in (200, 201):
             return response.json(), response.status_code
         
-        error_detail = response.json().get("detail", "Unknown error")
+        try:
+            error_detail = response.json().get("detail", "Unknown error")
+        except requests.exceptions.JSONDecodeError:
+            error_detail = response.text or "Unknown error"
+
         if response.status_code == 400:
             print(f"\n[Client Error]: {error_detail}")
         elif response.status_code == 403:
             print("\n[Access Denied]: Only librarians can perform this action.")
+        elif response.status_code == 404:
+            print(f"\n[Not Found]: {error_detail}")
+        elif response.status_code == 409:
+            print(f"\n[Conflict]: {error_detail}")
         elif response.status_code == 502:
             print(f"\n[External API Error]: {error_detail}")
         else:

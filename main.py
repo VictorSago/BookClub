@@ -52,8 +52,10 @@ def import_book(
     # Check local SQLite database first
     existing_book = database.find_book_by_isbn(clean_isbn)
     if existing_book:
-        response.status_code = status.HTTP_200_OK
-        return existing_book
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Book with ISBN {clean_isbn} already exists in the library catalog."
+        )
 
     # Query Open Library API
     try:
@@ -63,7 +65,7 @@ def import_book(
 
     if not results:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Book with ISBN {clean_isbn} not found in Open Library.",
         )
 
