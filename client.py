@@ -58,7 +58,7 @@ def get_json(url, params=None, headers=None, timeout=5):
     return None
 
 
-def post_json(url: str, json_data: dict, headers: dict | None = None, timeout: int = 10) -> dict | None:
+def post_json(url: str, json_data: dict, headers: dict | None = None, timeout: int = 10) -> tuple[dict | None, int | None]:
     """Send a POST request and handle exceptions safely without crashing the CLI."""
     try:
         response = requests.post(url, json=json_data, headers=headers, timeout=timeout)
@@ -76,6 +76,8 @@ def post_json(url: str, json_data: dict, headers: dict | None = None, timeout: i
         else:
             print(f"\n[Error {response.status_code}]: {error_detail}")
             
+        return None, response.status_code
+
     except requests.exceptions.Timeout:
         print("\n[Error] Connection timed out. Open Library is taking too long to respond.")
     except requests.exceptions.ConnectionError:
@@ -83,7 +85,7 @@ def post_json(url: str, json_data: dict, headers: dict | None = None, timeout: i
     except requests.exceptions.RequestException as error:
         print(f"\n[Network Error] {type(error).__name__}: {error}")
         
-    return None
+    return None, None
 
 
 def main():

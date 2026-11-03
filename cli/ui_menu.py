@@ -77,9 +77,10 @@ def add_book(post_json_func, base_url: str, api_key: str | None = None, card_num
         if api_key:
             headers["X-API-Key"] = api_key
 
-        card_number = user_session.get_userdata().get("cardnumber")
-        if card_number:
-            headers["X-Card-Number"] = str(card_number)
+        # get current user data to include card number in the request if available
+        current_user = user_session.get_userdata()
+        if current_user and current_user.card_number:
+            headers["X-Card-Number"] = str(current_user.card_number)
 
         payload = {"isbn": clean_isbn}
         url = f"{base_url}/books/import"
