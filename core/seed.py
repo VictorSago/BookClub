@@ -11,13 +11,12 @@ import secrets
 from pathlib import Path
 from datetime import date, timedelta
 import sqlite3
-from core.database import DB_PATH, connect, new_card_number
+from core.database import DB_PATH, LOAN_DAYS, connect, new_card_number
 
 
 BASE_DIR = Path(__file__).parent
 SCHEMA_PATH = BASE_DIR / "schema.sql"
 
-LOAN_DAYS = 21  # Keep in sync with the default loan length in the API.
 ANONYMISED_NAME = "Anonymised member"
 
 AUTHORS = [
