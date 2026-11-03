@@ -406,12 +406,100 @@ def list_members(*, name: str | None = None) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def _select_member(conn, member_id: int) -> dict | None:
+    """Return one member by ID, or None. Callers pass an open connection."""
+    row = conn.execute(
+        "SELECT " + _MEMBER_COLUMNS + " FROM members WHERE member_id = ?", (member_id,)
+    ).fetchone()
+    return dict(row) if row is not None else None
+
+
 def get_member_by_id(member_id: int) -> dict | None:
     """Return one member by ID, or None if there is no such ID."""
     with connect() as conn:
+        return _select_member(conn, member_id)
+
+
+def _ensure_email_free(conn, email: str, *, own_member_id: int | None = None) -> None:
+    """Raise RuleViolation if another member already has this email.
+
+    The comparison ignores case, because the column is declared COLLATE NOCASE.
+    A member's own email does not count as taken.
+    """
+    row = conn.execute(
+        "SELECT member_id FROM members WHERE email = ?", (email,)
+    ).fetchone()
+    if row is not None and row["member_id"] != own_member_id:
+        raise RuleViolation("Another member already has this email address.")
+
+
+def create_member(name: str, email: str, *, phone: str | None = None) -> dict:
+    """Register a member and return them, with their new card number.
+
+    The card number is made here and the join date is the column default,
+    so the caller chooses neither.
+
+    Raises:
+        RuleViolation: if another member already has this email.
+    """
+    with connect() as conn:
+        # Take the write lock first, so the email check and the insert
+        # cannot be interleaved with another request.
+        conn.execute("BEGIN IMMEDIATE")
+        _ensure_email_free(conn, email)
+        card_number = new_card_number()
+        while conn.execute(
+            "SELECT 1 FROM members WHERE card_number = ?", (card_number,)
+            ).fetchone():
+            card_number = new_card_number()
+        conn.execute(
+            "INSERT INTO members (card_number, name, email, phone) "
+            "VALUES (?, ?, ?, ?)",
+            (card_number, name, email, phone)
+        )
         row = conn.execute(
-            "SELECT " + _MEMBER_COLUMNS + " FROM members "
-            "WHERE member_id = ?",
-            (member_id,)
+            "SELECT " + _MEMBER_COLUMNS + " FROM members WHERE card_number = ?",
+            (card_number,)
         ).fetchone()
-    return dict(row) if row is not None else None
+    return {**dict(row), "card_number": card_number}
+
+
+_EDITABLE_MEMBER_COLUMNS = ("name", "email", "phone")
+
+
+def update_member(member_id: int, changes: dict) -> dict | None:
+    """Change a member's name, email or phone and return the member, or None.
+
+    Args:
+        member_id: the member to change.
+        changes: the new values, by column. Only the keys ``name``, ``email``
+            and ``phone`` are used; the card number and join date cannot be
+            changed. Columns that are not in ``changes`` stay as they are.
+
+    Returns:
+        The member after the change (same shape as ``get_member_by_id()``),
+        or None if there is no such member.
+
+    Raises:
+        RuleViolation: if the member is anonymised, or another member
+            already has the new email.
+    """
+    columns = [c for c in _EDITABLE_MEMBER_COLUMNS if c in changes]
+    with connect() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        member = _select_member(conn, member_id)
+        if member is None:
+            return None
+        if member["anonymised_at"] is not None:
+            raise RuleViolation("An anonymised member cannot be changed.")
+        if "email" in columns:
+            _ensure_email_free(conn, changes["email"], own_member_id=member_id)
+        if columns:
+            conn.execute(
+                "UPDATE members SET "
+                + ", ".join(column + " = ?" for column in columns)
+                + " WHERE member_id = ?",
+                [changes[column] for column in columns] + [member_id]
+            )
+            member = _select_member(conn, member_id)
+    return member

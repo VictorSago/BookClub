@@ -6,7 +6,8 @@ from fastapi import FastAPI, Query, HTTPException
 from core import database
 from core.auth import CurrentMember, CurrentLibrarian
 from core.models import (
-    BookOut, LoanOut, MemberOut, MyDataOut, WhoAmIOut, LoanCreate
+    BookOut, LoanOut, MemberCreate, MemberDataOut, MemberOut, MemberUpdate,
+    MyDataOut, WhoAmIOut, LoanCreate
     )
 
 
@@ -94,3 +95,31 @@ def get_member(member_id: int, _librarian: CurrentLibrarian):
     if member is None:
         raise HTTPException(status_code=404, detail="Member not found")
     return member
+
+
+@app.post("/members", response_model=MemberDataOut, status_code=201)
+def create_member(body: MemberCreate, _librarian: CurrentLibrarian):
+    try:
+        return database.create_member(body.name, body.email, phone=body.phone)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+
+
+def _apply_member_update(member_id: int, changes: dict) -> dict:
+    try:
+        member = database.update_member(member_id, changes)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return member
+
+
+@app.put("/members/{member_id}", response_model=MemberOut)
+def replace_member(member_id: int, body: MemberCreate, _librarian: CurrentLibrarian):
+    return _apply_member_update(member_id, body.model_dump())
+
+
+@app.patch("/members/{member_id}", response_model=MemberOut)
+def patch_member(member_id: int, body: MemberUpdate, _librarian: CurrentLibrarian):
+    return _apply_member_update(member_id, body.model_dump(exclude_unset=True))
