@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from typing import Literal
 
@@ -47,3 +47,7 @@ class MemberDataOut(BaseModel):
 class MyDataOut(BaseModel):
     member: MemberDataOut
     loans: list[LoanOut]
+
+
+class LoanCreate(BaseModel):
+    book_id: int = Field(gt=0)

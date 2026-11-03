@@ -36,6 +36,7 @@ import sqlite3
 from collections import defaultdict
 from collections.abc import Generator
 from contextlib import contextmanager
+from datetime import date, timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -45,6 +46,16 @@ DB_PATH = Path(os.environ.get("LIBRARY_DB", DEFAULT_DB))
 
 CARD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890"
 CARD_LENGTH = 12
+
+LOAN_DAYS = 21  # Keep in sync with the default loan length in the API.
+
+
+class RuleViolation(Exception):
+    """Raised when a request breaks a library rule.
+
+    The message is meant for the user, for example "This book is already
+    on loan." The API turns it into a 409 response.
+    """
 
 
 def new_card_number() -> str:
@@ -110,6 +121,12 @@ def _like_pattern(text: str) -> str:
     return "%" + escaped + "%"
 
 
+_ON_LOAN = (
+    "EXISTS (SELECT 1 FROM loans l "
+    "WHERE l.book_id = b.book_id AND l.return_date IS NULL)"
+)
+
+
 def _select_books(conn, where: str = "", params=()) -> list[dict]:
     """Return books with authors and availability.
 
@@ -119,10 +136,7 @@ def _select_books(conn, where: str = "", params=()) -> list[dict]:
     book_rows = conn.execute(
         "SELECT b.book_id, b.title, b.first_publish_year, b.isbn, "
         "b.open_library_key, b.added_at, "
-        "NOT EXISTS ("
-        "    SELECT 1 FROM loans l "
-        "    WHERE l.book_id = b.book_id AND l.return_date IS NULL"
-        ") AS available "
+        "NOT " + _ON_LOAN + " AS available "
         "FROM books b" 
         + where 
         + " ORDER BY b.title COLLATE NOCASE",
@@ -146,7 +160,11 @@ def _select_books(conn, where: str = "", params=()) -> list[dict]:
 
 
 def list_books(
-    *, title: str | None = None, year: int | None = None, author: str | None
+    *, 
+    title: str | None = None, 
+    year: int | None = None, 
+    author: str | None = None, 
+    available: bool | None = None
     ) -> list[dict]:
     """Return books, each with a list of its author names.
 
@@ -154,6 +172,8 @@ def list_books(
         title: the title contains this text (case-insensitive for ASCII).
         year: the first publication year is exactly this.
         author: one of the book's authors has a name containing this text.
+        available: True gives only books that are not on loan, False only
+            books that are.
     """
     conditions = []
     params = []
@@ -172,10 +192,19 @@ def list_books(
             ")"
         )
         params.append(_like_pattern(author))
+    if available is not None:
+        conditions.append(("NOT " + _ON_LOAN) if available else _ON_LOAN)
     where = (" WHERE " + " AND ".join(conditions)) if conditions else ""
     
     with connect() as conn:
         return _select_books(conn, where, params)
+
+
+def get_book_by_id(book_id: int) -> dict | None:
+    """Return one book with its authors and availability, or None."""
+    with connect() as conn:
+        books = _select_books(conn, " WHERE b.book_id = ?", (book_id,))
+    return books[0] if books else None
 
 
 def find_member_by_card(card_number: str) -> dict | None:
@@ -242,6 +271,101 @@ def list_member_loans(member_id: int, *, active: bool | None = None) -> list[dic
         loan["book"] = by_id[loan.pop("book_id")]
         loans.append(loan)
     return loans
+
+
+def borrow_book(member_id: int, book_id: int) -> dict | None:
+    """Lend a book to a member and return the new loan, or None.
+
+    The loan date is today and the due date is ``LOAN_DAYS`` later. The
+    caller cannot choose either.
+
+    Returns:
+        The loan as a dict in the shape of the items of
+        ``list_member_loans()``, or None if the book does not exist.
+
+    Raises:
+        RuleViolation: if the member is anonymised or the book is already
+            on loan.
+    
+    Authors:
+        Mohana Muruganandham, Victor Sago.
+    """
+    today = date.today()
+    due = today + timedelta(days=LOAN_DAYS)
+    with connect() as conn:
+        # Take the write lock first, so that checking availability and
+        # inserting the loan cannot be interleaved with another request.
+        conn.execute("BEGIN IMMEDIATE")
+        member = conn.execute(
+            "SELECT 1 FROM members WHERE member_id = ? AND anonymised_at IS NULL",
+            (member_id,)
+        ).fetchone()
+        if member is None:
+            raise RuleViolation("This member account cannot borrow books.")
+        books = _select_books(conn, " WHERE b.book_id = ?", (book_id,))
+        if not books:
+            return None
+        book = books[0]
+        if not book["available"]:
+            raise RuleViolation("This book is already on loan.")
+        cursor = conn.execute(
+            "INSERT INTO loans (member_id, book_id, loan_date, due_date) "
+            "VALUES (?, ?, ?, ?)",
+            (member_id, book_id, today.isoformat(), due.isoformat())
+        )
+        loan_id = cursor.lastrowid
+        if loan_id is None:
+            raise RuntimeError("Inserting the loan did not create a row.")
+    book["available"] = False
+    return {
+        "loan_id": loan_id,
+        "loan_date": today.isoformat(),
+        "due_date": due.isoformat(),
+        "return_date": None,
+        "overdue": False,
+        "book": book,
+    }
+
+
+def return_book(member_id: int, loan_id: int) -> dict | None:
+    """Mark one of the member's loans as returned today and return it.
+
+    Returns:
+        The loan as a dict in the shape of the items of
+        ``list_member_loans()``, or None if there is no such loan or it
+        belongs to another member.
+
+    Raises:
+        RuleViolation: if the loan has already been returned.
+    """
+    today = date.today().isoformat()
+    with connect() as conn:
+        # Take the write lock first, so two requests cannot both return
+        # the same loan.
+        conn.execute("BEGIN IMMEDIATE")
+        row = conn.execute(
+            "SELECT loan_id, book_id, loan_date, due_date, return_date "
+            "FROM loans WHERE loan_id = ? AND member_id = ?",
+            (loan_id, member_id)
+        ).fetchone()
+        if row is None:
+            return None
+        if row["return_date"] is not None:
+            raise RuleViolation("This book has already been returned.")
+        conn.execute(
+            "UPDATE loans SET return_date = ? WHERE loan_id = ?",
+            (today, loan_id)
+        )
+        # Read the book after the update, so ``available`` is already True.
+        book = _select_books(conn, " WHERE b.book_id = ?", (row["book_id"],))[0]
+    return {
+        "loan_id": row["loan_id"],
+        "loan_date": row["loan_date"],
+        "due_date": row["due_date"],
+        "return_date": today,
+        "overdue": False,
+        "book": book,
+    }
 
 
 def get_member_data(member_id: int) -> dict | None:

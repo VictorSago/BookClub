@@ -67,3 +67,12 @@ Tasks:
 - Mohana: Loan service function
 - Maryna: Add book function
 - Christofer: Finish up show books function, start on UI login (replace placeholder function)
+
+## 2026-11-02
+
+Tasks:
+
+- Victor: Resolve code conflicts
+- Mohana: Borrow book function
+- Maryna: Add book function
+- Christofer: UI Login function

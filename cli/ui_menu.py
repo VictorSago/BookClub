@@ -1,6 +1,6 @@
+from cli.constants import MAIN_MENU_TEXT, ADMIN_MENU_TEXT
+from cli import input_handlers, user_session, login_service
 
-from cli.constants import ADMIN_MENU_TEXT
-from cli import input_handlers, user_session
 
 def show_books(get_json_func, base_url):
     print("\nShow books:\n\nYou can search books by Title, Author, Publishing year or any combination.")
@@ -127,26 +127,10 @@ def add_member():
     return response.status_code
 '''
 
-
-def user_login():
-    cardnumber = input_handlers.get_valid_text(
-        "Please enter your library card number: ", # prompt for user input
-        "Card number is your personal 12-digit number. Please try again."  #error message for empty input
-    )
-    user_session.set_userdata({"cardnumber": cardnumber}) # PLACEHOLDER for show without FastAPI connection
-    print(user_session._userdata, "Welcome!")             # These three lines should be replaced with API query for cardnumber-check
-    return None                                           # If cardnumber and API-Key is correct -> user_session.set_userdata({"cardnumber": cardnumber})
-
-'''
-    member = # query fastAPI requests.get(f"{BASE}/members/", timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
-    
-'''
-
-
 def exit_program():
     # Shutdown sequence
+    login_service.user_logout()
     print("Turning system off")
-
     exit()
 
 

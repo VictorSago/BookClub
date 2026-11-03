@@ -6,9 +6,10 @@ _userdata:User = None
 
 
 class User:
-    def __init__(self, cardnumber):
-        self.cardnumber = cardnumber
-
+    def __init__(self, role, member_id, name):
+        self.role = role
+        self.member_id = member_id
+        self.name = name
 
 def set_userdata(user:User):
     global _userdata
