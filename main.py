@@ -59,6 +59,17 @@ def create_my_loan(body: LoanCreate, member: CurrentMember):
     return loan
 
 
+@app.post("/me/loans/{loan_id}/return", response_model=LoanOut)
+def return_my_loan(loan_id: int, member: CurrentMember):
+    try:
+        loan = database.return_book(member["member_id"], loan_id)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if loan is None:
+        raise HTTPException(status_code=404, detail="Loan not found")
+    return loan
+
+
 @app.get("/me/data", response_model=MyDataOut)
 def get_my_data(member: CurrentMember):
     data = database.get_member_data(member["member_id"])
