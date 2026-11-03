@@ -80,6 +80,19 @@ def add_member():
     return response.status_code
 '''
 
+def show_my_data(get_json_func, base_url):
+    print("\nShow my data:\n")
+
+    data = get_json_func(f"{base_url}/me/data", headers={"X-API-Key": login_service.api_key, "X-Card-Number": "DEMOCARD0001"}) # REPLACE: "DEMOCARD0001" with the actual card number of the logged in user when API is online
+    member = data.get("member", 0)
+    loans = data.get("loans", 0)
+
+    for key, value in member.items():
+        print(f"{key}: {value}")
+
+    print(f"\nNumber of Loans: {len(loans)}")
+
+
 def exit_program():
     # Shutdown sequence
     login_service.user_logout()
