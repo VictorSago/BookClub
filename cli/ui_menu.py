@@ -1,5 +1,6 @@
 from cli.constants import MAIN_MENU_TEXT, ADMIN_MENU_TEXT
 from cli import input_handlers, user_session, login_service
+from client import api_key, BASE, requests
 
 
 def show_books(get_json_func, base_url):
@@ -61,7 +62,7 @@ def add_member():
     
     user_input = input_handlers.get_int_range("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
-    if user_input == 1: # ADD: Checks for typing errors - phone number
+    if user_input == 1:
         name = input_handlers.get_valid_text("Please type name of the new member: ", "Name cannot be empty.")
         email = input_handlers.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
         phone = input_handlers.get_valid_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
@@ -69,7 +70,7 @@ def add_member():
         return
 
     print(name, email, phone) # EXCHANGE: with something like below when API is online
-'''
+
     member = {
     "name": name,
     "email": email,
@@ -78,7 +79,8 @@ def add_member():
 
     response = requests.post(f"{BASE}/members", json=member, timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
     return response.status_code
-'''
+
+# POST /members | 201 | Register a member |
 
 def exit_program():
     # Shutdown sequence
