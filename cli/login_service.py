@@ -30,6 +30,7 @@ def user_login(get_json_func, base_url):
         if member == None:  
             print("Login failed. Please check your card number and API key.")
         else:
+            member["cardnumber"] = cardnumber
             user_session.set_userdata(member)
             print(f"\nLogin successful. Welcome {member.get('name')}!\nYou are logged in as a {member.get('role')}")
             return None
