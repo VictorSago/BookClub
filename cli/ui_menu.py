@@ -72,7 +72,7 @@ def add_member():
         email = input_handlers.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
         phone = input_handlers.get_valid_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
     else:
-        return
+        return None
 
     print(name, email, phone) # EXCHANGE: with something like below when API is online
 
@@ -88,7 +88,12 @@ def add_member():
                              timeout=5, 
                              headers={"X-API-Key": login_service.api_key, 
                                       "X-Card-Number": user_session.get_userdata().get("cardnumber")}) # CHECK: that setup matches our API
-    return response.status_code
+    
+    print(response.status_code) # TESTING
+    if response.status_code == 201:
+        print(f"Member added! \n ID: {response.json().get('member_id')}, Card number: {response.json().get('card_number')}")
+    else:
+        print(f"Failed to add member. Status code: {response.status_code}, Message: {response.json().get('detail')}")
 '''
 
 
