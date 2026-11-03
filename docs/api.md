@@ -19,11 +19,12 @@
 | librarian | POST /books/import | 201 | Add a book from Open Library | Planned |
 | librarian | PUT, PATCH /books/{book_id} | 200 | Edit a book | Planned |
 | librarian | DELETE /books/{book_id} | 204 | Remove a book | Planned |
-| librarian | GET /members | 200 | Find a member | Planned |
-| librarian | GET /members/{member_id} | 200 | Show one member | Planned |
-| librarian | POST /members | 201 | Register a member | Planned |
-| librarian | PUT, PATCH /members/{member_id} | 200 | Edit a member | Planned |
-| librarian | DELETE /members/{member_id} | 204 | Remove a member | Planned |
+| librarian | GET /members | 200 | Find a member | Done |
+| librarian | GET /members/{member_id} | 200 | Show one member | Done |
+| librarian | POST /members | 201 | Register a member | Done |
+| librarian | PUT, PATCH /members/{member_id} | 200 | Edit a member | Done |
+| librarian | DELETE /members/{member_id} | 204 | Remove a member without loans | Done |
+| librarian | POST /members/{member_id}/anonymise | 200 | Anonymise a member | Done |
 | librarian | GET /loans/overdue | 200 | Overdue loans | Planned |
 | librarian | GET /stats/most-borrowed | 200 | Most borrowed | Planned |
 | librarian | GET /stats/never-borrowed | 200 | Never borrowed | Planned |

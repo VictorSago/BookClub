@@ -123,3 +123,24 @@ def replace_member(member_id: int, body: MemberCreate, _librarian: CurrentLibrar
 @app.patch("/members/{member_id}", response_model=MemberOut)
 def patch_member(member_id: int, body: MemberUpdate, _librarian: CurrentLibrarian):
     return _apply_member_update(member_id, body.model_dump(exclude_unset=True))
+
+
+@app.delete("/members/{member_id}", status_code=204)
+def delete_member(member_id: int, _librarian: CurrentLibrarian):
+    try:
+        member = database.delete_member(member_id)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+
+@app.post("/members/{member_id}/anonymise", response_model=MemberOut)
+def anonymise_member(member_id: int, _librarian: CurrentLibrarian):
+    try:
+        member = database.anonymise_member(member_id)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return member

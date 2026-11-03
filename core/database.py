@@ -49,6 +49,12 @@ CARD_LENGTH = 12
 
 LOAN_DAYS = 21  # Keep in sync with the default loan length in the API.
 
+ANONYMISED_NAME = "Anonymised member"
+
+_MEMBER_COLUMNS = "member_id, name, email, phone, joined_at, anonymised_at"
+_EDITABLE_MEMBER_COLUMNS = ("name", "email", "phone")
+
+
 
 class RuleViolation(Exception):
     """Raised when a request breaks a library rule.
@@ -56,11 +62,6 @@ class RuleViolation(Exception):
     The message is meant for the user, for example "This book is already
     on loan." The API turns it into a 409 response.
     """
-
-
-def new_card_number() -> str:
-    """Return a random card number made of capital letters and digits."""
-    return "".join(secrets.choice(CARD_ALPHABET) for _ in range(CARD_LENGTH))
 
 
 def get_connection(create: bool = False) -> sqlite3.Connection:
@@ -381,9 +382,6 @@ def get_member_data(member_id: int) -> dict | None:
     return {"member": dict(row), "loans": list_member_loans(member_id)}
 
 
-_MEMBER_COLUMNS = "member_id, name, email, phone, joined_at, anonymised_at"
-
-
 def list_members(*, name: str | None = None) -> list[dict]:
     """Return the members who are not anonymised, ordered by name.
 
@@ -433,6 +431,22 @@ def _ensure_email_free(conn, email: str, *, own_member_id: int | None = None) ->
         raise RuleViolation("Another member already has this email address.")
 
 
+def new_card_number() -> str:
+    """Return a random card number made of capital letters and digits."""
+    return "".join(secrets.choice(CARD_ALPHABET) for _ in range(CARD_LENGTH))
+
+
+def _new_unused_card_number(conn) -> str:
+    """Return a card number that no member has. Callers pass an open
+    connection."""
+    while True:
+        card_number = new_card_number()
+        if conn.execute(
+            "SELECT 1 FROM members WHERE card_number = ?", (card_number,)
+        ).fetchone() is None:
+            return card_number
+
+
 def create_member(name: str, email: str, *, phone: str | None = None) -> dict:
     """Register a member and return them, with their new card number.
 
@@ -447,11 +461,7 @@ def create_member(name: str, email: str, *, phone: str | None = None) -> dict:
         # cannot be interleaved with another request.
         conn.execute("BEGIN IMMEDIATE")
         _ensure_email_free(conn, email)
-        card_number = new_card_number()
-        while conn.execute(
-            "SELECT 1 FROM members WHERE card_number = ?", (card_number,)
-            ).fetchone():
-            card_number = new_card_number()
+        card_number = _new_unused_card_number(conn)
         conn.execute(
             "INSERT INTO members (card_number, name, email, phone) "
             "VALUES (?, ?, ?, ?)",
@@ -462,9 +472,6 @@ def create_member(name: str, email: str, *, phone: str | None = None) -> dict:
             (card_number,)
         ).fetchone()
     return {**dict(row), "card_number": card_number}
-
-
-_EDITABLE_MEMBER_COLUMNS = ("name", "email", "phone")
 
 
 def update_member(member_id: int, changes: dict) -> dict | None:
@@ -502,4 +509,76 @@ def update_member(member_id: int, changes: dict) -> dict | None:
                 [changes[column] for column in columns] + [member_id]
             )
             member = _select_member(conn, member_id)
+    return member
+
+
+def delete_member(member_id: int) -> dict | None:
+    """Delete a member who has never borrowed a book and return them, or None.
+
+    Returns:
+        The deleted member (same shape as ``get_member_by_id()``), or None
+        if there is no such member.
+
+    Raises:
+        RuleViolation: if the member has any loan, open or returned. The
+            loan history must stay, so such a member is anonymised instead.
+    """
+    with connect() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        member = _select_member(conn, member_id)
+        if member is None:
+            return None
+        if conn.execute(
+            "SELECT 1 FROM loans WHERE member_id = ?", (member_id,)
+        ).fetchone():
+            raise RuleViolation(
+                "This member has borrowing history and cannot be deleted. "
+                "Anonymise the member instead."
+            )
+        conn.execute("DELETE FROM members WHERE member_id = ?", (member_id,))
+    return member
+
+
+def anonymise_member(member_id: int) -> dict | None:
+    """Remove a member's personal data but keep their loan history.
+
+    The name and email are replaced by placeholders, the phone number is
+    cleared, the card is replaced by a new random one (so the old card stops
+    working) and ``anonymised_at`` is set to today. The loans stay, now
+    attached to an anonymous member.
+
+    Returns:
+        The member afterwards (same shape as ``get_member_by_id()``), or
+        None if there is no such member.
+
+    Raises:
+        RuleViolation: if the member is already anonymised or still has a
+            book on loan.
+    """
+    with connect() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        member = _select_member(conn, member_id)
+        if member is None:
+            return None
+        if member["anonymised_at"] is not None:
+            raise RuleViolation("This member is already anonymised.")
+        if conn.execute(
+            "SELECT 1 FROM loans WHERE member_id = ? AND return_date IS NULL",
+            (member_id,)
+        ).fetchone():
+            raise RuleViolation(
+                "This member still has a book on loan. Return all books first."
+            )
+        conn.execute(
+            "UPDATE members SET name = ?, email = ?, phone = NULL, "
+            "card_number = ?, anonymised_at = ? WHERE member_id = ?",
+            (
+                ANONYMISED_NAME,
+                f"anonymised-{secrets.token_hex(4)}@example.invalid",
+                _new_unused_card_number(conn),
+                date.today().isoformat(),
+                member_id,
+            )
+        )
+        member = _select_member(conn, member_id)
     return member
