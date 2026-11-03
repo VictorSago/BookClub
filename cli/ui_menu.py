@@ -1,6 +1,6 @@
-from cli.constants import MAIN_MENU_TEXT, ADMIN_MENU_TEXT
-from cli import input_handlers, user_session
 
+from cli.constants import ADMIN_MENU_TEXT
+from cli import input_handlers, user_session
 
 def show_books(get_json_func, base_url):
     print("\nShow books:\n\nYou can search books by Title, Author, Publishing year or any combination.")
@@ -49,9 +49,56 @@ def return_book():
     print("\nReturn a book:\n")
     pass
 
-def add_book():
-    print("\nAdd a book:\n")
-    pass
+
+def add_book(post_json_func, base_url: str, api_key: str | None = None, card_number: str | int | None = None) -> None:
+    """Interactively prompts the user for an ISBN, checks length, and sends it to the API."""
+    print("\nAdd Book from Open Library")
+
+    while True:
+        # Prompt user directly; pressing Enter on empty input cancels the action
+        user_input = input("Enter book ISBN (10 or 13 digits) or press Enter to cancel: ").strip()
+
+        # Exit to the menu if input is empty
+        if not user_input:
+            print("Action cancelled.")
+            return
+
+        # Strip hyphens and spaces before verifying length
+        clean_isbn = user_input.replace("-", "").replace(" ", "")
+
+        # Check only length on the client side; format rules are handled by the backend
+        if len(clean_isbn) not in (10, 13):
+            print("Invalid input. ISBN must be 10 or 13 characters long. Please try again.")
+            continue
+
+        print(f"Searching Open Library for ISBN: {clean_isbn}...")
+
+        headers = {}
+        if api_key:
+            headers["X-API-Key"] = api_key
+
+        card_number = user_session.get_userdata().get("cardnumber")
+        if card_number:
+            headers["X-Card-Number"] = str(card_number)
+
+        payload = {"isbn": clean_isbn}
+        url = f"{base_url}/books/import"
+
+        # Send POST request to the API
+        result, status_code = post_json_func(url, json_data=payload, headers=headers)
+
+        if status_code == 201 and result:
+            print(f"\nSuccess! Added new book '{result['title']}' (ID: {result['book_id']}).")
+            break
+        elif status_code == 200 and result:
+            print(f"\nBook '{result['title']}' (ID: {result['book_id']}) already exists in the library catalog.")
+            break
+        else:
+            # Prompt user to retry on failure
+            retry = input("\nWould you like to try another ISBN? (y/n): ").strip().lower()
+            if retry != "y":
+                break
+
 
 def add_member():
     print("\nAdd new member:\n")
@@ -103,7 +150,7 @@ def exit_program():
     exit()
 
 
-def admin_ui():
+def admin_ui(post_json_func, base_url, api_key):
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
@@ -111,7 +158,7 @@ def admin_ui():
         )
         
         if user_input == 1:
-            add_book()
+            add_book(post_json_func, base_url, api_key)
         elif user_input == 2:
             add_member()
         elif user_input == 0:

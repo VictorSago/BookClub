@@ -1,11 +1,13 @@
 
+import re
 from typing import Annotated
 
-from fastapi import FastAPI, Query, Depends, HTTPException
+from fastapi import FastAPI, Query, Depends, HTTPException, Response, status
 
 from core import database
 from auth import CurrentMember, CurrentLibrarian
-from core.models import BookOut, LoanOut, MyDataOut, WhoAmIOut
+from core.models import BookOut, BookImportCreate, LoanOut, MyDataOut, WhoAmIOut
+from external_api import OpenLibraryError, search_books
 
 
 app = FastAPI(title="Book Club Library")
@@ -18,6 +20,51 @@ def get_books(
     author: Annotated[str | None, Query(description="An author's name contains this text")] = None
     ):
     return database.list_books(title=title, year=year, author=author)
+
+
+@app.post("/books/import", response_model=BookOut, status_code=201)
+def import_book(
+    payload: BookImportCreate,
+    librarian: CurrentLibrarian,
+    response: Response,
+):
+    """Import a book by ISBN from Open Library or return existing local copy."""
+    # Clean and validate ISBN format
+    clean_isbn = re.sub(r"[-\s]", "", payload.isbn.strip())
+    if len(clean_isbn) not in (10, 13):
+        raise HTTPException(
+            status_code=400,
+            detail="ISBN must be 10 or 13 characters long without hyphens.",
+        )
+
+    # Check local SQLite database first
+    existing_book = database.find_book_by_isbn(clean_isbn)
+    if existing_book:
+        response.status_code = status.HTTP_200_OK
+        return existing_book
+
+    # Query Open Library API
+    try:
+        results = search_books(isbn=clean_isbn, limit=1)
+    except OpenLibraryError as error:
+        raise HTTPException(status_code=502, detail=str(error))
+
+    if not results:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Book with ISBN {clean_isbn} not found in Open Library.",
+        )
+
+    book_data = results[0]
+
+    # Save into SQLite and return created record
+    return database.create_book(
+        title=book_data["title"],
+        first_publish_year=book_data.get("first_publish_year"),
+        open_library_key=book_data.get("open_library_key"),
+        isbn=clean_isbn,
+        authors=book_data.get("authors", []),
+    )
 
 
 @app.get("/whoami", response_model=WhoAmIOut)
