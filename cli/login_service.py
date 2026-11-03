@@ -32,10 +32,10 @@ def user_login(get_json_func, base_url):
         else:
             user_session.set_userdata(member)
             print(f"\nLogin successful. Welcome {member.get('name')}!\nYou are logged in as a {member.get('role')}")
-            break
+            return None
 
 
 def user_logout():
     user_session.set_userdata(None)
-    print("You have been logged out.")
+    print("\nYou have been logged out.")
     return None
