@@ -381,7 +381,7 @@ def get_member_data(member_id: int) -> dict | None:
     return {"member": dict(row), "loans": list_member_loans(member_id)}
 
 
-_MEMBER_COLUMNS = "member_id, name, email, phone, joined_at"
+_MEMBER_COLUMNS = "member_id, name, email, phone, joined_at, anonymised_at"
 
 
 def list_members(*, name: str | None = None) -> list[dict]:
@@ -407,11 +407,11 @@ def list_members(*, name: str | None = None) -> list[dict]:
 
 
 def get_member_by_id(member_id: int) -> dict | None:
-    """Return one member who is not anonymised, or None."""
+    """Return one member by ID, or None if there is no such ID."""
     with connect() as conn:
         row = conn.execute(
             "SELECT " + _MEMBER_COLUMNS + " FROM members "
-            "WHERE member_id = ? AND anonymised_at IS NULL",
+            "WHERE member_id = ?",
             (member_id,)
         ).fetchone()
     return dict(row) if row is not None else None

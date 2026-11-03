@@ -36,11 +36,11 @@ class MemberOut(BaseModel):
     email: str
     phone: str | None = None
     joined_at: str
+    anonymised_at: str | None = None
 
 
 class MemberDataOut(MemberOut):
     card_number: str
-    anonymised_at: str | None = None
 
 
 class MyDataOut(BaseModel):
