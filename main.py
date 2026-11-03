@@ -4,8 +4,10 @@ from typing import Annotated
 from fastapi import FastAPI, Query, HTTPException
 
 from core import database
-from auth import CurrentMember, CurrentLibrarian
-from core.models import BookOut, LoanOut, MyDataOut, WhoAmIOut, LoanCreate
+from core.auth import CurrentMember, CurrentLibrarian
+from core.models import (
+    BookOut, LoanOut, MemberOut, MyDataOut, WhoAmIOut, LoanCreate
+    )
 
 
 app = FastAPI(title="Book Club Library")
@@ -76,3 +78,19 @@ def get_my_data(member: CurrentMember):
     if data is None:
         raise HTTPException(status_code=404, detail="Member not found")
     return data
+
+
+@app.get("/members", response_model=list[MemberOut])
+def get_members(
+    _librarian: CurrentLibrarian, 
+    name: Annotated[str | None, Query(description="Name contains this text")] = None
+    ):
+    return database.list_members(name=name)
+
+
+@app.get("/members/{member_id}", response_model=MemberOut)
+def get_member(member_id: int, _librarian: CurrentLibrarian):
+    member = database.get_member_by_id(member_id)
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return member

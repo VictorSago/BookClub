@@ -30,13 +30,16 @@ class LoanOut(BaseModel):
     book: BookOut
 
 
-class MemberDataOut(BaseModel):
+class MemberOut(BaseModel):
     member_id: int
-    card_number: str
     name: str
     email: str
     phone: str | None = None
     joined_at: str
+
+
+class MemberDataOut(MemberOut):
+    card_number: str
     anonymised_at: str | None = None
 
 

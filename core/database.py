@@ -17,7 +17,7 @@ variable ``LIBRARY_DB`` to use another file. This module never creates the
 tables: that is the job of ``schema.sql`` and ``seed.py``.
 
 Examples:
-    from database import connect
+    from core.database import connect
 
     with connect() as conn:
         conn.execute(
@@ -223,25 +223,25 @@ def find_member_by_card(card_number: str) -> dict | None:
 
 def list_member_loans(member_id: int, *, active: bool | None = None) -> list[dict]:
     """Return the loans of one member, with the book of each loan 
-        and still-open loans first.
+    and still-open loans first.
     
-        Loans that are still out come first, then returned loans. Within each
-        group the newest loan comes first.
+    Loans that are still out come first, then returned loans. Within each 
+    group the newest loan comes first.
     
-        Args:
-            member_id: the member whose loans to list.
-            active: filter by loan status. True gives only loans that have not
-                been returned yet, False only returned loans, and None (the
-                default) the whole history.
-    
-        Returns:
-            A list of dicts with the keys ``loan_id``, ``loan_date``,
-            ``due_date``, ``return_date`` (None while the book is out),
-            ``overdue`` (True if the book is out and past its due date) and
-            ``book``, a dict in the same shape as the items of ``list_books()``.
-            The list is empty if the member has no matching loans or does not
-            exist.
-        """
+    Args:
+        member_id: the member whose loans to list.
+        active: filter by loan status. True gives only loans that have not 
+            been returned yet, False only returned loans, and None (the
+            default) the whole history.
+
+    Returns:
+        A list of dicts with the keys ``loan_id``, ``loan_date``,
+        ``due_date``, ``return_date`` (None while the book is out),
+        ``overdue`` (True if the book is out and past its due date) and
+        ``book``, a dict in the same shape as the items of ``list_books()``.
+        The list is empty if the member has no matching loans or does not
+        exist.
+    """
     conditions = ["l.member_id = ?"]
     if active is not None:
         conditions.append(
@@ -379,3 +379,39 @@ def get_member_data(member_id: int) -> dict | None:
     if row is None:
         return None
     return {"member": dict(row), "loans": list_member_loans(member_id)}
+
+
+_MEMBER_COLUMNS = "member_id, name, email, phone, joined_at"
+
+
+def list_members(*, name: str | None = None) -> list[dict]:
+    """Return the members who are not anonymised, ordered by name.
+
+    Args:
+        name: if given, only members whose name contains this text
+            (case-insensitive for ASCII).
+    """
+    conditions = ["anonymised_at IS NULL"]
+    params = []
+    if name is not None:
+        conditions.append("name LIKE ? ESCAPE '\\'")
+        params.append(_like_pattern(name))
+    with connect() as conn:
+        rows = conn.execute(
+            "SELECT " + _MEMBER_COLUMNS + " FROM members "
+            "WHERE " + " AND ".join(conditions) + " "
+            "ORDER BY name COLLATE NOCASE, member_id",
+            params
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def get_member_by_id(member_id: int) -> dict | None:
+    """Return one member who is not anonymised, or None."""
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT " + _MEMBER_COLUMNS + " FROM members "
+            "WHERE member_id = ? AND anonymised_at IS NULL",
+            (member_id,)
+        ).fetchone()
+    return dict(row) if row is not None else None
