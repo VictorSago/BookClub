@@ -55,11 +55,16 @@ def add_book():
     pass
 
 def add_member():
+
+    if user_session.get_userdata().get("role") != "librarian":
+        print("You need to be a librarian to add new members.")
+        return
+
     print("\nAdd new member:\n")
     name = ""
     email = ""
     phone = ""
-    
+
     user_input = input_handlers.get_int_range("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
     if user_input == 1:
@@ -69,7 +74,7 @@ def add_member():
     else:
         return
 
-    print(user_session.get_userdata()) # EXCHANGE: with something like below when API is online
+    print(name, email, phone) # EXCHANGE: with something like below when API is online
 
 '''
     member = {
