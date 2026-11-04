@@ -10,13 +10,15 @@ def show_books(get_json_func, base_url):
     title = input_handlers.get_valid_text("Type the Title or leave blank:\n", can_be_empty=True)
     author = input_handlers.get_valid_text("Type the Author or leave blank:\n", can_be_empty=True)
     year = input_handlers.get_valid_int("Type Publishing year (ex. 1992) or leave blank:\n", can_be_empty=True)
+    available = input_handlers.get_valid_int("Type 1 for available books or leave blank for all books:\n", can_be_empty=True)
 
     if title: query_string = query_string + "title=" + title + "&"
     if author: query_string = query_string + "author=" + author + "&"
     if year is not None: query_string = query_string + "year=" + str(year) + "&"
+    if available == 1: query_string = query_string + "available=" + str(True) + "&"
 
     books = get_json_func(f"{base_url}/books{query_string}")
-    
+
     if books == None: return None   # HTTP failure, get_json() prints reason
 
     if len(books) == 0:
