@@ -1,23 +1,5 @@
 
 
-
-
-# Functions needed for sprint 1:
-
-# Show books (member)
-# Borrow a book (member)
-# Return a book (member)
-
-# Register a new member (librarian)
-# Add book from open library (librarian)
-
-# General:
-# Recieve and clearly display error-messeges from API if something goes wrong in the connection with Open Library (no crash).
-# Likewise if something goes wrong when connecting to our database.
-
-
-
-
 import os, requests, json
 from dotenv import load_dotenv
 
