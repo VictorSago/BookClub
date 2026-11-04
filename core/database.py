@@ -605,6 +605,25 @@ def anonymise_member(member_id: int) -> dict | None:
     return member
 
 
+def delete_or_anonymise_member(member_id: int) -> dict | None:
+    """Remove a member: delete them if they never borrowed, else anonymise.
+
+    A member without loans is deleted. A member with loan history is
+    anonymised, so the history stays.
+
+    Returns:
+        The member as ``delete_member()`` or ``anonymise_member()`` returns
+        them, or None if there is no such member.
+
+    Raises:
+        RuleViolation: if the member still has a book on loan.
+    """
+    try:
+        return delete_member(member_id)
+    except RuleViolation:  # Raised only because the member has loans.
+        return anonymise_member(member_id)
+
+
 def find_book_by_isbn(isbn: str) -> dict | None:
     """Return a single book by its ISBN from the local database, or None.
     
