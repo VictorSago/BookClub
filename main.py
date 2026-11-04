@@ -7,8 +7,9 @@ from fastapi import FastAPI, Query, HTTPException, Response, status
 from core import database
 from core.auth import CurrentMember, CurrentLibrarian
 from core.models import (
-    BookImportCreate, BookOut, LoanCreate, LoanOut, MemberCreate, MemberDataOut, MemberOut, MemberUpdate, 
-    MyDataOut, WhoAmIOut, MostBorrowedOut, OverdueLoanOut
+    BookImportCreate, BookOut, LoanCreate, LoanOut, MemberCreate, MemberDataOut, 
+    MemberOut, MemberDetailOut, MemberUpdate, MyDataOut, WhoAmIOut, 
+    MostBorrowedOut, OverdueLoanOut
     )
 from external_api import OpenLibraryError, search_books
 
@@ -51,7 +52,6 @@ def import_book(
             status_code=400,
             detail="ISBN must be 10 or 13 characters long without hyphens.",
         )
-
     # Check local SQLite database first
     existing_book = database.find_book_by_isbn(clean_isbn)
     if existing_book:
@@ -152,9 +152,9 @@ def get_members(
     return database.list_members(name=name)
 
 
-@app.get("/members/{member_id}", response_model=MemberOut)
+@app.get("/members/{member_id}", response_model=MemberDetailOut)
 def get_member(member_id: int, _librarian: CurrentLibrarian):
-    member = database.get_member_by_id(member_id)
+    member = database.get_member_with_loans(member_id)
     if member is None:
         raise HTTPException(status_code=404, detail="Member not found")
     return member

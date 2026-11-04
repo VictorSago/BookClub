@@ -439,6 +439,18 @@ def get_member_by_id(member_id: int) -> dict | None:
         return _select_member(conn, member_id)
 
 
+def get_member_with_loans(member_id: int) -> dict | None:
+    """Return one member, anonymised or not, with their loans, or None.
+
+    The member is in the shape of ``get_member_by_id()``, plus ``loans``:
+    the whole loan history, in the shape of ``list_member_loans()``.
+    """
+    member = get_member_by_id(member_id)
+    if member is None:
+        return None
+    return {**member, "loans": list_member_loans(member_id)}
+
+
 def _ensure_email_free(conn, email: str, *, own_member_id: int | None = None) -> None:
     """Raise RuleViolation if another member already has this email.
 

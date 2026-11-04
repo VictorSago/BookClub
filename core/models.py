@@ -47,6 +47,10 @@ class MemberDataOut(MemberOut):
     card_number: str
 
 
+class MemberDetailOut(MemberOut):
+    loans: list[LoanOut]
+
+
 class MyDataOut(BaseModel):
     member: MemberDataOut
     loans: list[LoanOut]
