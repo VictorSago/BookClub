@@ -160,6 +160,23 @@ def show_my_data(get_json_func, base_url):
         print("")
 
 
+def show_one_member_data(get_json_func, base_url):
+    print("\nShow member data:\n")
+
+    member_id = input_handlers.get_valid_int("Please type the member ID of the member you want to see data for: ", "Member ID must be a valid integer.")
+
+    member_data = get_json_func(f"{base_url}/members/{member_id}", 
+                         headers={"X-API-Key": login_service.api_key, 
+                                  "X-Card-Number": user_session.get_userdata().card_number})
+    
+    if member_data is None:
+        print("Failed to retrieve user data.")  # Print on failure to interact with the API, get_jason() prints reason
+        return
+
+    for key, value in member_data.items():
+        print(f"{key}: {value}")
+
+
 def exit_program():
     # Shutdown sequence
     login_service.user_logout()
@@ -167,17 +184,19 @@ def exit_program():
     exit()
 
 
-def admin_ui(post_json_func, base_url, api_key):
+def admin_ui(post_json_func, get_json_func, base_url, api_key):
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
-            0, 2
+            0, 3
         )
         
         if user_input == 1:
             add_book(post_json_func, base_url, api_key)
         elif user_input == 2:
             add_member()
+        elif user_input == 3:
+            show_one_member_data(get_json_func, base_url)
         elif user_input == 0:
             break
             
