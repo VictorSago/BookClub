@@ -103,7 +103,7 @@ def main():
         login_service.user_login(get_json, BASE)
 
     while user_session.is_loggedin():
-        if user_session._userdata["role"] == "librarian":
+        if user_session.get_userdata().role == "librarian":
             user_input = input_handlers.get_int_range(
                 MAIN_MENU_TEXT_LIBRARIAN,
                 0, 4
