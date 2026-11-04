@@ -43,8 +43,8 @@ def show_books(get_json_func, base_url):
 
 
 def borrow_book():
-    print("\nBorrow a book:\n")
-    pass
+    """Open the Borrow Book feature."""
+    borrow_book_cli()
 
 def return_book():
     print("\nReturn a book:\n")
