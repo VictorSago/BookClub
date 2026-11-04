@@ -91,7 +91,7 @@ def main():
                 0, 4
                 )
             if user_input == 1:
-                admin_ui(post_json, BASE, api_key)
+                admin_ui()
             elif user_input == 2:
                 show_books(get_json, BASE)
             elif user_input == 3:

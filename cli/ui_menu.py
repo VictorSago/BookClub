@@ -1,5 +1,7 @@
 from cli.constants import ADMIN_MENU_TEXT
 from cli import input_handlers, user_session, login_service
+from cli.http_client import get_json, post_json, BASE, api_key
+from cli.stats_service import show_statistics_menu
 
 
 def show_books(get_json_func, base_url):
@@ -52,7 +54,7 @@ def return_book():
     pass
 
 
-def add_book(post_json_func, base_url: str, api_key: str | None = None, card_number: str | int | None = None) -> None:
+def add_book() -> None:
     """Interactively prompts the user for an ISBN, checks length, and sends it to the API."""
     print("\nAdd Book from Open Library")
 
@@ -85,10 +87,10 @@ def add_book(post_json_func, base_url: str, api_key: str | None = None, card_num
             headers["X-Card-Number"] = str(current_user.card_number)
 
         payload = {"isbn": clean_isbn}
-        url = f"{base_url}/books/import"
+        url = f"{BASE}/books/import"
 
         # Send POST request to the API
-        result, status_code = post_json_func(url, json_data=payload, headers=headers)
+        result, status_code = post_json(url, json_data=payload, headers=headers)
 
         if status_code == 201 and result:
             print(f"\nSuccess! Added new book '{result['title']}' (ID: {result['book_id']}).")
@@ -134,6 +136,7 @@ def add_member():
     return response.status_code
 '''
 
+
 def exit_program():
     # Shutdown sequence
     login_service.user_logout()
@@ -141,17 +144,19 @@ def exit_program():
     exit()
 
 
-def admin_ui(post_json_func, base_url, api_key):
+def admin_ui():
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
-            0, 2
+            0, 3
         )
         
         if user_input == 1:
-            add_book(post_json_func, base_url, api_key)
+            add_book()
         elif user_input == 2:
             add_member()
+        elif user_input == 3:
+            show_statistics_menu()
         elif user_input == 0:
             break
             
