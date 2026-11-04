@@ -1,9 +1,17 @@
 DATE_FORMAT = "%d.%m.%Y"
 DATE_FORMAT_DISPLAY = "DD.MM.YYYY"
 
-MAIN_MENU_TEXT = (
+MAIN_MENU_TEXT_LIBRARIAN = (
     "\nType a single number: \n"
     "1) Administrative functions (librarian)\n"
+    "2) Show books\n"
+    "3) Borrow book\n"
+    "4) Return book\n"
+    "0) Exit program\n"
+)
+
+MAIN_MENU_TEXT_MEMBER = (
+    "\nType a single number: \n"
     "2) Show books\n"
     "3) Borrow book\n"
     "4) Return book\n"

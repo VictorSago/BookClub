@@ -6,11 +6,11 @@ _userdata:User = None
 
 
 class User:
-    def __init__(self, role, member_id, name, cardnumber):
+    def __init__(self, role, member_id, name, card_number):
         self.role = role
         self.member_id = member_id
         self.name = name
-        self.cardnumber = cardnumber
+        self.card_number = card_number
 
 def set_userdata(user:User):
     global _userdata
