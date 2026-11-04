@@ -5,9 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 
-
 api_key = os.getenv("API_KEY")
-
 BASE = "http://127.0.0.1:8000"
 
 

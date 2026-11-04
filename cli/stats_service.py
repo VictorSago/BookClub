@@ -1,5 +1,5 @@
 from cli import input_handlers
-from cli.http_client import get_json, post_json , BASE
+from cli.http_client import get_json, BASE
 
 
 def show_statistics_menu() -> None:
@@ -23,7 +23,33 @@ def show_statistics_menu() -> None:
 
 def _show_top_borrowed_books() -> None:
     print("\n--- Most Borrowed Books ---")
+    books = get_json(f"{BASE}/stats/most-borrowed")
+    if books is None:
+        return
+
+    if not books:
+        print("No borrowing history found.")
+    else:
+        for index, book in enumerate(books, start=1): #TODO: sync with backend
+            title = book.get("title", "Unknown")
+            authors_str = ", ".join(book.get("authors", [])) or "Unknown Author"
+            count = book.get("borrow_count", 0)
+            print(f"{index}. {title}  by {authors_str} — borrowed {count} time(s)")
 
 
 def _show_never_borrowed_books() -> None:
     print("\n--- Books Never Borrowed ---")
+    books = get_json(f"{BASE}/stats/never-borrowed")
+    if books is None:
+        return
+
+    if not books:
+        print("All books in the catalog have been borrowed at least once.")
+    else:
+        print(f"Found {len(books)} unborrowed book(s):")
+        for index, book in enumerate(books, start=1):  #TODO: sync with backend
+            title = book.get("title", "Unknown")
+            authors_str = ", ".join(book.get("authors", [])) or "Unknown Author"
+            year = book.get("first_publish_year")
+            year_str = f" ({year})" if year else ""
+            print(f"{index}. {title}{year_str} by {authors_str}")
