@@ -32,7 +32,7 @@
 | member | POST /me/loans (body: book_id) | 201 | Borrow | Done |
 | member | POST /me/loans/{loan_id}/return | 200 | Return | Done |
 | member | GET /me/data | 200 | What do you have about me? | Done |
-| member | DELETE /me | 204 | Delete me (anonymise) | Planned |
+| member | DELETE /me | 204 | Delete me (anonymise) | Done |
 
 The statistics routes live under `/stats` so that they can't be swallowed by
 `/books/{book_id}`.
