@@ -1,5 +1,6 @@
 from cli.constants import MAIN_MENU_TEXT, ADMIN_MENU_TEXT
 from cli import input_handlers, user_session
+from cli.borrow_ui import borrow_book as borrow_book_cli
 
 
 def show_books(get_json_func, base_url):
