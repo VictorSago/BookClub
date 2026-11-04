@@ -107,9 +107,9 @@ def add_book(post_json_func, base_url: str, api_key: str | None = None, card_num
                 break
 
 
-def add_member():
+def add_member(post_json_func, base_url, api_key):
 
-    if user_session.get_userdata().get("role") != "librarian":
+    if user_session.get_userdata().role != "librarian":
         print("You need to be a librarian to add new members.")
         return
 
@@ -127,29 +127,20 @@ def add_member():
     else:
         return None
 
-    print(name, email, phone) # EXCHANGE: with something like below when API is online
-
-'''
-    member = {
+    new_member = {
     "name": name,
     "email": email,
     "phone": phone
     }
 
-    response = requests.post(f"{login_service.BASE}/members", 
-                             json=member, 
-                             timeout=5, 
-                             headers={"X-API-Key": login_service.api_key, 
-                                      "X-Card-Number": user_session.get_userdata().get("cardnumber")}) # CHECK: that setup matches our API
+    response, response_code = post_json_func(f"{base_url}/members", 
+                             json_data=new_member, 
+                             headers={"X-API-Key": api_key, 
+                                      "X-Card-Number": user_session.get_userdata().card_number}) # CHECK: that setup matches our API
+
+    if response_code == 201:       # Print the new member details if successfully added, else the post_json function already prints the error message
+        print(f"\nNew member added!\n\nID: {response.get('member_id')}\nName: {response.get('name')}\nCard number: {response.get('card_number')}\nEmail: {response.get('email')}\nPhone: {response.get('phone')}")
     
-    print(response.status_code) # TESTING
-    if response.status_code == 201:
-        print(f"Member added! \n ID: {response.json().get('member_id')}, Card number: {response.json().get('card_number')}")
-    else:
-        print(f"Failed to add member. Status code: {response.status_code}, Message: {response.json().get('detail')}")
-'''
-
-
 
 def exit_program():
     # Shutdown sequence
@@ -168,7 +159,7 @@ def admin_ui(post_json_func, base_url, api_key):
         if user_input == 1:
             add_book(post_json_func, base_url, api_key)
         elif user_input == 2:
-            add_member()
+            add_member(post_json_func, base_url, api_key)
         elif user_input == 0:
             break
             
