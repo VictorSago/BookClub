@@ -1,4 +1,4 @@
-from cli.constants import MAIN_MENU_TEXT, ADMIN_MENU_TEXT
+from cli.constants import ADMIN_MENU_TEXT
 from cli import input_handlers, user_session, login_service
 
 
