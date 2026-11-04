@@ -81,7 +81,9 @@ def return_book(card_number):
 
             # Update the loan through the backend's PATCH endpoint.
             
-            response = requests.post(
+            # Update the loan through the backend's PATCH endpoint.
+            
+            response = requests.patch(
             f"{BASE}/me/loans/{loan_id}/return",
             headers=headers,
             timeout=TIMEOUT,
