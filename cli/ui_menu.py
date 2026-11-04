@@ -142,6 +142,32 @@ def add_member(post_json_func, base_url, api_key):
         print(f"\nNew member added!\n\nID: {response.get('member_id')}\nName: {response.get('name')}\nCard number: {response.get('card_number')}\nEmail: {response.get('email')}\nPhone: {response.get('phone')}")
     
 
+def show_my_data(get_json_func, base_url):
+    print("\nShow my data:\n")
+
+    data = get_json_func(f"{base_url}/me/data", 
+                         headers={"X-API-Key": login_service.api_key, 
+                                  "X-Card-Number": user_session.get_userdata().card_number})
+    
+    if data is None:
+        print("Failed to retrieve user data.")  # Print on failure to interact with the API, get_jason() prints reason
+        return
+    
+    member = data.get("member", 0)
+    del member["anonymised_at"]
+    loans = data.get("loans", 0)
+
+    for key, value in member.items():
+        print(f"{key}: {value}")
+
+    print(f"\nNumber of Loans: {len(loans)}\n")
+
+    for loan in loans:
+        print(f"Title: {loan['book']['title']}")
+        print(f"Due date: {loan['due_date']}")
+        print("")
+
+
 def exit_program():
     # Shutdown sequence
     login_service.user_logout()
