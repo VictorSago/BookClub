@@ -11,7 +11,7 @@ load_dotenv(".env", override=True)
 
 api_key = os.getenv("API_KEY", "")
 
-BASE = "http://127.0.0.1:800"
+BASE = "http://127.0.0.1:8000"
 
 
 
@@ -30,8 +30,14 @@ def user_login(get_json_func, base_url):
         if member == None:  
             print("Login failed. Please check your card number and API key.")
         else:
-            user_session.set_userdata(member)
-            print(f"\nLogin successful. Welcome {member.get('name')}!\nYou are logged in as a {member.get('role')}")
+            user = user_session.User(
+                role=member.get("role"),
+                member_id=member.get("member_id"),
+                name=member.get("name"),
+                card_number=cardnumber
+            )
+            user_session.set_userdata(user)
+            print(f"\nLogin successful. Welcome {user.name}!\nYou are logged in as a {user.role}")
             return None
 
 
