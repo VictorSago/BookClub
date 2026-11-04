@@ -7,8 +7,8 @@ from fastapi import FastAPI, Query, HTTPException, Response, status
 from core import database
 from core.auth import CurrentMember, CurrentLibrarian
 from core.models import (
-    BookOut, BookImportCreate, LoanOut, MemberCreate, MemberDataOut, MemberOut, MemberUpdate,
-    MyDataOut, WhoAmIOut, LoanCreate
+    BookImportCreate, BookOut, LoanCreate, LoanOut, MemberCreate, MemberDataOut, MemberOut, MemberUpdate, 
+    MyDataOut, WhoAmIOut, MostBorrowedOut, OverdueLoanOut
     )
 from external_api import OpenLibraryError, search_books
 
@@ -193,3 +193,23 @@ def anonymise_member(member_id: int, _librarian: CurrentLibrarian):
     if member is None:
         raise HTTPException(status_code=404, detail="Member not found")
     return member
+
+
+@app.get("/loans/overdue", response_model=list[OverdueLoanOut])
+def get_overdue_loans(_librarian: CurrentLibrarian):
+    return database.list_overdue_loans()
+
+
+@app.get("/stats/most-borrowed", response_model=list[MostBorrowedOut])
+def get_most_borrowed_books(
+    _librarian: CurrentLibrarian,
+    limit: Annotated[
+        int, Query(ge=1, le=50, description="The most books to return")
+    ] = 5,
+):
+    return database.most_borrowed_books(limit=limit)
+
+
+@app.get("/stats/never-borrowed", response_model=list[BookOut])
+def get_never_borrowed_books(_librarian: CurrentLibrarian):
+    return database.never_borrowed_books()

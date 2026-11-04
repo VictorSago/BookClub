@@ -79,3 +79,11 @@ class MemberUpdate(BaseModel):
             if field in self.model_fields_set and getattr(self, field) is None:
                 raise ValueError(f"{field} cannot be null.")
         return self
+
+
+class OverdueLoanOut(LoanOut):
+    member: MemberOut
+
+
+class MostBorrowedOut(BookOut):
+    loan_count: int
