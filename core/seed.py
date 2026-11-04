@@ -11,13 +11,11 @@ import secrets
 from pathlib import Path
 from datetime import date, timedelta
 import sqlite3
-from core.database import DB_PATH, LOAN_DAYS, connect, new_card_number
+from core.database import DB_PATH, LOAN_DAYS, ANONYMISED_NAME, connect, new_card_number
 
 
 BASE_DIR = Path(__file__).parent
 SCHEMA_PATH = BASE_DIR / "schema.sql"
-
-ANONYMISED_NAME = "Anonymised member"
 
 AUTHORS = [
     "J. R. R. Tolkien",

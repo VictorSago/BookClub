@@ -2,11 +2,14 @@
 import re
 from typing import Annotated
 
-from fastapi import FastAPI, Query, Depends, HTTPException, Response, status
+from fastapi import FastAPI, Query, HTTPException, Response, status
 
 from core import database
-from auth import CurrentMember, CurrentLibrarian
-from core.models import BookOut, BookImportCreate, LoanOut, MyDataOut, WhoAmIOut, LoanCreate
+from core.auth import CurrentMember, CurrentLibrarian
+from core.models import (
+    BookOut, BookImportCreate, LoanOut, MemberCreate, MemberDataOut, MemberOut, MemberUpdate,
+    MyDataOut, WhoAmIOut, LoanCreate
+    )
 from external_api import OpenLibraryError, search_books
 
 
@@ -125,3 +128,68 @@ def get_my_data(member: CurrentMember):
     if data is None:
         raise HTTPException(status_code=404, detail="Member not found")
     return data
+
+
+@app.get("/members", response_model=list[MemberOut])
+def get_members(
+    _librarian: CurrentLibrarian, 
+    name: Annotated[str | None, Query(description="Name contains this text")] = None
+    ):
+    return database.list_members(name=name)
+
+
+@app.get("/members/{member_id}", response_model=MemberOut)
+def get_member(member_id: int, _librarian: CurrentLibrarian):
+    member = database.get_member_by_id(member_id)
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return member
+
+
+@app.post("/members", response_model=MemberDataOut, status_code=201)
+def create_member(body: MemberCreate, _librarian: CurrentLibrarian):
+    try:
+        return database.create_member(body.name, body.email, phone=body.phone)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+
+
+def _apply_member_update(member_id: int, changes: dict) -> dict:
+    try:
+        member = database.update_member(member_id, changes)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return member
+
+
+@app.put("/members/{member_id}", response_model=MemberOut)
+def replace_member(member_id: int, body: MemberCreate, _librarian: CurrentLibrarian):
+    return _apply_member_update(member_id, body.model_dump())
+
+
+@app.patch("/members/{member_id}", response_model=MemberOut)
+def patch_member(member_id: int, body: MemberUpdate, _librarian: CurrentLibrarian):
+    return _apply_member_update(member_id, body.model_dump(exclude_unset=True))
+
+
+@app.delete("/members/{member_id}", status_code=204)
+def delete_member(member_id: int, _librarian: CurrentLibrarian):
+    try:
+        member = database.delete_member(member_id)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+
+@app.post("/members/{member_id}/anonymise", response_model=MemberOut)
+def anonymise_member(member_id: int, _librarian: CurrentLibrarian):
+    try:
+        member = database.anonymise_member(member_id)
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return member
