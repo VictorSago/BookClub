@@ -15,6 +15,10 @@ class BookOut(BaseModel):
     available: bool
 
 
+class BookImportCreate(BaseModel):
+    isbn: str
+
+
 class WhoAmIOut(BaseModel):
     role: Literal["member", "librarian"]
     member_id: int
