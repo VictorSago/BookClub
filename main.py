@@ -7,11 +7,6 @@ from fastapi import FastAPI, Query, HTTPException, Response, status
 from core import database
 from core import models
 from core.auth import CurrentMember, CurrentLibrarian
-# from core.models import (
-#     BookImportCreate, BookOut, LoanCreate, LoanOut, MemberCreate, MemberDataOut, 
-#     MemberOut, MemberDetailOut, MemberUpdate, MyDataOut, WhoAmIOut, 
-#     MostBorrowedOut, OverdueLoanOut
-#     )
 from external_api import OpenLibraryError, search_books
 
 
@@ -37,6 +32,21 @@ def get_book(book_id: int):
     if book is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return book
+
+
+@app.get("/books/{book_id}/loans", response_model=list[models.LoanWithMemberOut])
+def get_book_loans(
+    book_id: int,
+    _librarian: CurrentLibrarian,
+    active: Annotated[
+        bool | None,
+        Query(description="true: out now; false: returned; omit: all")
+        ] = None
+    ):
+    loans = database.list_book_loans(book_id, active=active)
+    if loans is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return loans
 
 
 @app.post("/books/import", response_model=models.BookOut, status_code=201)

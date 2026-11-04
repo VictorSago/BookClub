@@ -135,6 +135,23 @@ def _in_list(values) -> str:
     return "(" + ",".join("?" * len(values)) + ")"
 
 
+_LOANS_ORDER = (
+    " ORDER BY l.return_date IS NOT NULL, l.loan_date DESC, l.loan_id DESC"
+)
+
+
+def _loan_where(column: str, active: bool | None) -> str:
+    """Return the WHERE clause for the loans (alias l) whose ``column`` is
+    the value of one ``?``, optionally only the open or only the returned.
+
+    ``column`` is a fixed column name such as "member_id", never user input.
+    """
+    where = " WHERE l." + column + " = ?"
+    if active is not None:
+        where += " AND l.return_date IS " + ("NULL" if active else "NOT NULL")
+    return where
+
+
 def _select_books(conn, where: str = "", params=()) -> list[dict]:
     """Return books with authors and availability.
 
@@ -251,6 +268,25 @@ def _attach_books(conn, loan_rows) -> list[dict]:
     return loans
 
 
+def _attach_members(conn, loans: list[dict]) -> list[dict]:
+    """Give each loan dict its borrower, and return the same list.
+
+    Every loan needs a ``member_id`` key. In the dict it is replaced by
+    ``member``, in the shape of ``get_member_by_id()``. Callers pass an open
+    connection.
+    """
+    if not loans:
+        return loans
+    member_ids = list({loan["member_id"] for loan in loans})
+    members = _select_members(
+        conn, " WHERE member_id IN " + _in_list(member_ids), member_ids
+    )
+    by_id = {member["member_id"]: member for member in members}
+    for loan in loans:
+        loan["member"] = by_id[loan.pop("member_id")]
+    return loans
+
+
 def list_member_loans(member_id: int, *, active: bool | None = None) -> list[dict]:
     """Return the loans of one member, with the book of each loan 
     and still-open loans first.
@@ -272,20 +308,47 @@ def list_member_loans(member_id: int, *, active: bool | None = None) -> list[dic
         The list is empty if the member has no matching loans or does not
         exist.
     """
-    conditions = ["l.member_id = ?"]
-    if active is not None:
-        conditions.append(
-            "l.return_date IS NULL" if active else "l.return_date IS NOT NULL"
-        )
     with connect() as conn:
         loan_rows = conn.execute(
-            "SELECT l.loan_id, l.book_id, l.loan_date, l.due_date, l.return_date, "
-            + _OVERDUE + " AS overdue "
-            "FROM loans l WHERE " + " AND ".join(conditions) + " "
-            "ORDER BY l.return_date IS NOT NULL, l.loan_date DESC, l.loan_id DESC",
+            "SELECT l.loan_id, l.book_id, l.loan_date, l.due_date, "
+            "l.return_date, " + _OVERDUE + " AS overdue "
+            "FROM loans l" + _loan_where("member_id", active) + _LOANS_ORDER,
             (member_id,)
         ).fetchall()
         return _attach_books(conn, loan_rows)
+
+
+def list_book_loans(book_id: int, *, active: bool | None = None) -> list[dict] | None:
+    """Return the loans of one book, each with its borrower.
+
+    Loans that are still out come first, then returned loans. Within each
+    group the newest loan comes first.
+
+    Args:
+        book_id: the book whose loans to list.
+        active: True gives only the loan that has not been returned yet
+            (who has the book now), False only returned loans, and None
+            (the default) the whole history.
+
+    Returns:
+        A list of dicts with the keys ``loan_id``, ``loan_date``,
+        ``due_date``, ``return_date``, ``overdue`` (as in
+        ``list_member_loans()``) and ``member``, a dict in the shape of
+        ``get_member_by_id()``. The list is empty if the book has no
+        matching loans. The result is None if there is no such book.
+    """
+    with connect() as conn:
+        if conn.execute(
+            "SELECT 1 FROM books WHERE book_id = ?", (book_id,)
+        ).fetchone() is None:
+            return None
+        loan_rows = conn.execute(
+            "SELECT l.loan_id, l.member_id, l.loan_date, l.due_date, "
+            "l.return_date, " + _OVERDUE + " AS overdue "
+            "FROM loans l" + _loan_where("book_id", active) + _LOANS_ORDER,
+            (book_id,)
+        ).fetchall()
+        return _attach_members(conn, [dict(row) for row in loan_rows])
 
 
 def borrow_book(member_id: int, book_id: int) -> dict | None:
@@ -733,17 +796,7 @@ def list_overdue_loans() -> list[dict]:
             "FROM loans l WHERE " + _OVERDUE + " "
             "ORDER BY l.due_date, l.loan_id"
         ).fetchall()
-        loans = _attach_books(conn, loan_rows)
-        if not loans:
-            return []
-        member_ids = list({loan["member_id"] for loan in loans})
-        members = _select_members(
-            conn, " WHERE member_id IN " + _in_list(member_ids), member_ids
-        )
-    by_id = {member["member_id"]: member for member in members}
-    for loan in loans:
-        loan["member"] = by_id[loan.pop("member_id")]
-    return loans
+        return _attach_members(conn, _attach_books(conn, loan_rows))
 
 
 def most_borrowed_books(*, limit: int) -> list[dict]:

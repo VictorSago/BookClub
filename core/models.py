@@ -25,12 +25,15 @@ class WhoAmIOut(BaseModel):
     name: str
 
 
-class LoanOut(BaseModel):
+class LoanBase(BaseModel):
     loan_id: int
     loan_date: str
     due_date: str
     return_date: str | None = None
     overdue: bool
+    
+    
+class LoanOut(LoanBase):
     book: BookOut
 
 
@@ -49,6 +52,10 @@ class MemberDataOut(MemberOut):
 
 class MemberDetailOut(MemberOut):
     loans: list[LoanOut]
+
+
+class LoanWithMemberOut(LoanBase):
+    member: MemberOut
 
 
 class MyDataOut(BaseModel):
