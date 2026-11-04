@@ -137,8 +137,13 @@ def add_member():
 def show_my_data(get_json_func, base_url):
     print("\nShow my data:\n")
 
-    data = get_json_func(f"{base_url}/me/data", headers={"X-API-Key": login_service.api_key, "X-Card-Number": "DEMOCARD0002"}) # REPLACE: "DEMOCARD0002" with info from user_session when main is ready
+    data = get_json_func(f"{base_url}/me/data", headers={"X-API-Key": login_service.api_key, "X-Card-Number": user_session.get_userdata().card_number})
+    if data is None:
+        print("Failed to retrieve user data.")
+        return
+    
     member = data.get("member", 0)
+    del member["anonymised_at"]
     loans = data.get("loans", 0)
 
     for key, value in member.items():
@@ -150,6 +155,7 @@ def show_my_data(get_json_func, base_url):
         print(f"Title: {loan['book']['title']}")
         print(f"Due date: {loan['due_date']}")
         print("")
+
 
 def exit_program():
     # Shutdown sequence
