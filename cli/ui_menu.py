@@ -170,7 +170,7 @@ def show_one_member_data(get_json_func, base_url):
                                   "X-Card-Number": user_session.get_userdata().card_number})
     
     if member_data is None:
-        print("Failed to retrieve user data.")  # Print on failure to interact with the API, get_jason() prints reason
+        print("Failed to retrieve member data.")  # Print on failure to interact with the API, get_jason() prints reason
         return
 
     for key, value in member_data.items():
