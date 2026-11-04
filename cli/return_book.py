@@ -1,14 +1,19 @@
+"""CLI workflow for returning a borrowed BookClub library book."""
 
 import os
+
 import requests
+from dotenv import load_dotenv
 
 from . import input_handlers
 
-# Reuse BASE, TIMEOUT and _show_request_error
-# from your existing CLI configuration.
+load_dotenv(".env", override=True)
 
+BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+TIMEOUT = 5
 
 def return_book(card_number):
+    """Display a member's active loans and return the selected loan."""
     api_key = os.getenv("API_KEY")
     if not api_key:
         print("\nAPI key is not configured.")
@@ -23,7 +28,6 @@ def return_book(card_number):
 
     try:
         print("\nFetching your borrowed books...")
-
         response = requests.get(
             f"{BASE}/me/loans",
             params={"active": "true"},
@@ -49,9 +53,7 @@ def return_book(card_number):
             print(f"Book ID:  {book['book_id']}")
             print(f"Due date: {loan['due_date']}")
 
-        valid_loan_ids = {
-            loan["loan_id"] for loan in loans
-        }
+        valid_loan_ids = {loan["loan_id"] for loan in loans}
 
         while True:
             loan_id = input_handlers.get_valid_int(
@@ -67,45 +69,37 @@ def return_book(card_number):
                 continue
 
             selected_loan = next(
-                loan for loan in loans
-                if loan["loan_id"] == loan_id
+                loan for loan in loans if loan["loan_id"] == loan_id
             )
-
             print(f"\nTitle: {selected_loan['book']['title']}")
             print(f"Loan ID: {loan_id}")
 
-            confirm = input(
-                "\nConfirm return? (y/n): "
-            ).strip().lower()
-
+            confirm = input("\nConfirm return? (y/n): ").strip().lower()
             if confirm != "y":
                 print("Return cancelled.")
                 return
 
-            response = requests.patch(
-                f"{BASE}/me/loans/{loan_id}/return",
-                headers=headers,
-                timeout=TIMEOUT,
+            # Update the loan through the backend's PATCH endpoint.
+            
+            response = requests.post(
+            f"{BASE}/me/loans/{loan_id}/return",
+            headers=headers,
+            timeout=TIMEOUT,
             )
+
             response.raise_for_status()
             returned_loan = response.json()
 
             print("\n===== BOOK RETURNED SUCCESSFULLY =====")
             print(f"Loan ID: {loan_id}")
-            print(
-                f"Title: {selected_loan['book']['title']}"
-            )
-            print(
-                f"Returned on: {returned_loan['return_date']}"
-            )
+            print(f"Title: {selected_loan['book']['title']}")
+            print(f"Returned on: {returned_loan['return_date']}")
             print("The book is now available for borrowing.")
             return
 
     except requests.exceptions.RequestException as error:
-        _show_request_error(error)
-
+        print(f"\nReturn request failed: {error}")
     except (ValueError, KeyError, TypeError):
         print("The server returned an invalid response.")
-
     except (EOFError, KeyboardInterrupt):
         print("\nReturn cancelled.")
