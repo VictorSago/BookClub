@@ -1,5 +1,6 @@
 from cli.constants import ADMIN_MENU_TEXT
 from cli import input_handlers, user_session, login_service
+from cli.borrow_ui import borrow_book as borrow_book_cli
 
 
 def show_books(get_json_func, base_url):
@@ -44,8 +45,8 @@ def show_books(get_json_func, base_url):
 
 
 def borrow_book():
-    print("\nBorrow a book:\n")
-    pass
+    """Open the Borrow Book feature."""
+    borrow_book_cli()
 
 def return_book():
     print("\nReturn a book:\n")
