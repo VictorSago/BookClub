@@ -4,25 +4,17 @@
 import os
 from cli import input_handlers, user_session
 from dotenv import load_dotenv
+from cli.http_client import get_json, post_json, BASE, api_key
 
 
-load_dotenv(".env", override=True)
-
-
-api_key = os.getenv("API_KEY", "")
-
-BASE = "http://127.0.0.1:8000"
-
-
-
-def user_login(get_json_func, base_url):
+def user_login():
     while True:
         cardnumber = input_handlers.get_valid_text(
             "Please enter your library card number: ", # prompt for user input
             "Card number is your personal 12-digit number. Please try again."  #error message for empty input
         )
 
-        member = get_json_func(f"{base_url}/whoami", 
+        member = get_json(f"{BASE}/whoami", 
                             params=None, 
                             headers={"X-API-Key": api_key, "X-Card-Number": cardnumber}, 
                             timeout=5)

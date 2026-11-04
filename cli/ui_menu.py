@@ -1,8 +1,9 @@
 from cli.constants import ADMIN_MENU_TEXT
 from cli import input_handlers, user_session, login_service
+from cli.http_client import post_json, get_json, BASE, api_key
 
 
-def show_books(get_json_func, base_url):
+def show_books():
     print("\nShow books:\n\nYou can search books by Title, Author, Publishing year or any combination.")
     print("If you do not want to use a specific search criteria you leave it blank.\n\n")
 
@@ -17,7 +18,7 @@ def show_books(get_json_func, base_url):
     if year is not None: query_string = query_string + "year=" + str(year) + "&"
     if available == 1: query_string = query_string + "available=" + str(True) + "&"
 
-    books = get_json_func(f"{base_url}/books{query_string}")
+    books = get_json(f"{BASE}/books{query_string}")
 
     if books == None: return None   # HTTP failure, get_json() prints reason
 
@@ -167,7 +168,7 @@ def exit_program():
     exit()
 
 
-def admin_ui(post_json_func, base_url, api_key):
+def admin_ui():
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
@@ -175,7 +176,7 @@ def admin_ui(post_json_func, base_url, api_key):
         )
         
         if user_input == 1:
-            add_book(post_json_func, base_url, api_key)
+            add_book(post_json, BASE, api_key)
         elif user_input == 2:
             add_member()
         elif user_input == 0:
