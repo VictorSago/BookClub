@@ -379,3 +379,82 @@ def get_member_data(member_id: int) -> dict | None:
     if row is None:
         return None
     return {"member": dict(row), "loans": list_member_loans(member_id)}
+
+
+def find_book_by_isbn(isbn: str) -> dict | None:
+    """Return a single book by its ISBN from the local database, or None.
+    
+    Reuses _select_books to automatically attach author names and calculate
+    availability status.
+    """
+    with connect() as conn:
+        books = _select_books(conn, " WHERE b.isbn = ?", (isbn,))
+        return books[0] if books else None
+
+
+def create_book(
+    *,
+    title: str,
+    first_publish_year: int | None = None,
+    open_library_key: str | None = None,
+    isbn: str | None = None,
+    authors: list[str] | None = None,
+) -> dict:
+    """Insert a new book and its authors into the database.
+
+    Args:
+        title: Book title (cannot be empty).
+        first_publish_year: Publication year (between 1400 and 2200, or None).
+        open_library_key: Work or edition key from Open Library (or None).
+        isbn: Clean ISBN-10 or ISBN-13 without hyphens (or None).
+        authors: List of author names to associate with this book.
+
+    Returns:
+        A dictionary representation of the newly created book matching BookOut.
+    """
+    # Normalize empty strings to None to satisfy schema UNIQUE and CHECK constraints
+    clean_isbn = isbn.strip() if isbn and isbn.strip() else None
+    clean_ol_key = (
+        open_library_key.strip()
+        if open_library_key and open_library_key.strip()
+        else None
+    )
+
+    with connect() as conn:
+        # 1. Insert the book record into the books table
+        cursor = conn.execute(
+            "INSERT INTO books (title, first_publish_year, isbn, open_library_key) "
+            "VALUES (?, ?, ?, ?)",
+            (title.strip(), first_publish_year, clean_isbn, clean_ol_key),
+        )
+        book_id = cursor.lastrowid
+
+        # 2. Link authors via the junction table book_authors
+        for author_name in authors or []:
+            name = author_name.strip()
+            if not name:
+                continue
+
+            # Case-insensitive check to prevent duplicate author records
+            author_row = conn.execute(
+                "SELECT author_id FROM authors WHERE name = ? COLLATE NOCASE",
+                (name,),
+            ).fetchone()
+
+            if author_row:
+                author_id = author_row["author_id"]
+            else:
+                author_cursor = conn.execute(
+                    "INSERT INTO authors (name) VALUES (?)",
+                    (name,),
+                )
+                author_id = author_cursor.lastrowid
+
+            # Create relation in book_authors junction table
+            conn.execute(
+                "INSERT OR IGNORE INTO book_authors (book_id, author_id) VALUES (?, ?)",
+                (book_id, author_id),
+            )
+
+        # 3. Retrieve and return the populated book dictionary
+        return _select_books(conn, " WHERE b.book_id = ?", (book_id,))[0]
