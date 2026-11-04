@@ -21,7 +21,7 @@
 import os, requests, json
 from dotenv import load_dotenv
 
-from cli.constants import MAIN_MENU_TEXT
+from cli.constants import MAIN_MENU_TEXT_LIBRARIAN, MAIN_MENU_TEXT_MEMBER
 from cli import input_handlers, user_session, login_service
 from cli.ui_menu import (
     show_books,
@@ -58,28 +58,80 @@ def get_json(url, params=None, headers=None, timeout=5):
     return None
 
 
+def post_json(url: str, json_data: dict, headers: dict | None = None, timeout: int = 10) -> tuple[dict | None, int | None]:
+    """Send a POST request and handle exceptions safely without crashing the CLI."""
+    try:
+        response = requests.post(url, json=json_data, headers=headers, timeout=timeout)
+        
+        if response.status_code in (200, 201):
+            return response.json(), response.status_code
+        
+        try:
+            error_detail = response.json().get("detail", "Unknown error")
+        except requests.exceptions.JSONDecodeError:
+            error_detail = response.text or "Unknown error"
+
+        if response.status_code == 400:
+            print(f"\n[Client Error]: {error_detail}")
+        elif response.status_code == 403:
+            print("\n[Access Denied]: Only librarians can perform this action.")
+        elif response.status_code == 404:
+            print(f"\n[Not Found]: {error_detail}")
+        elif response.status_code == 409:
+            print(f"\n[Conflict]: {error_detail}")
+        elif response.status_code == 502:
+            print(f"\n[External API Error]: {error_detail}")
+        else:
+            print(f"\n[Error {response.status_code}]: {error_detail}")
+            
+        return None, response.status_code
+
+    except requests.exceptions.Timeout:
+        print("\n[Error] Connection timed out. Open Library is taking too long to respond.")
+    except requests.exceptions.ConnectionError:
+        print("\n[Error] Could not connect to the local library server.")
+    except requests.exceptions.RequestException as error:
+        print(f"\n[Network Error] {type(error).__name__}: {error}")
+        
+    return None, None
+
+
 def main():
     print("Welcome to your local library system!")
 
-    if user_session.is_loggedin() == False:
+    if not user_session.is_loggedin():
         login_service.user_login(get_json, BASE)
 
-    while user_session.is_loggedin() == True:
-        user_input = input_handlers.get_int_range(
-            MAIN_MENU_TEXT,
-            0, 4
-        )
+    while user_session.is_loggedin():
+        if user_session._userdata["role"] == "librarian":
+            user_input = input_handlers.get_int_range(
+                MAIN_MENU_TEXT_LIBRARIAN,
+                0, 4
+                )
+            if user_input == 1:
+                admin_ui(post_json, BASE, api_key)
+            elif user_input == 2:
+                show_books(get_json, BASE)
+            elif user_input == 3:
+                borrow_book()
+            elif user_input == 4:
+                return_book()
+            elif user_input == 0:
+                exit_program()
 
-        if user_input == 1:
-            admin_ui()
-        elif user_input == 2:
-            show_books(get_json, BASE)
-        elif user_input == 3:
-            borrow_book()
-        elif user_input == 4:
-            return_book()
-        elif user_input == 0:
-            exit_program()
+        else:
+            user_input = input_handlers.get_int_range(
+                MAIN_MENU_TEXT_MEMBER,
+                0, 4
+                )
+            if user_input == 2:
+                show_books(get_json, BASE)
+            elif user_input == 3:
+                borrow_book()
+            elif user_input == 4:
+                return_book()
+            elif user_input == 0:
+                exit_program()
 
 
 if __name__ == "__main__":
