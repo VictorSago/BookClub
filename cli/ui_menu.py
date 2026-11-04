@@ -137,9 +137,12 @@ def add_member():
 def show_my_data(get_json_func, base_url):
     print("\nShow my data:\n")
 
-    data = get_json_func(f"{base_url}/me/data", headers={"X-API-Key": login_service.api_key, "X-Card-Number": user_session.get_userdata().card_number})
+    data = get_json_func(f"{base_url}/me/data", 
+                         headers={"X-API-Key": login_service.api_key, 
+                                  "X-Card-Number": user_session.get_userdata().card_number})
+    
     if data is None:
-        print("Failed to retrieve user data.")
+        print("Failed to retrieve user data.")  # Print on failure to interact with the API, get_jason() prints reason
         return
     
     member = data.get("member", 0)
