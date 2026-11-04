@@ -17,7 +17,7 @@ variable ``LIBRARY_DB`` to use another file. This module never creates the
 tables: that is the job of ``schema.sql`` and ``seed.py``.
 
 Examples:
-    from database import connect
+    from core.database import connect
 
     with connect() as conn:
         conn.execute(
@@ -49,6 +49,12 @@ CARD_LENGTH = 12
 
 LOAN_DAYS = 21  # Keep in sync with the default loan length in the API.
 
+ANONYMISED_NAME = "Anonymised member"
+
+_MEMBER_COLUMNS = "member_id, name, email, phone, joined_at, anonymised_at"
+_EDITABLE_MEMBER_COLUMNS = ("name", "email", "phone")
+
+
 
 class RuleViolation(Exception):
     """Raised when a request breaks a library rule.
@@ -56,11 +62,6 @@ class RuleViolation(Exception):
     The message is meant for the user, for example "This book is already
     on loan." The API turns it into a 409 response.
     """
-
-
-def new_card_number() -> str:
-    """Return a random card number made of capital letters and digits."""
-    return "".join(secrets.choice(CARD_ALPHABET) for _ in range(CARD_LENGTH))
 
 
 def get_connection(create: bool = False) -> sqlite3.Connection:
@@ -223,25 +224,25 @@ def find_member_by_card(card_number: str) -> dict | None:
 
 def list_member_loans(member_id: int, *, active: bool | None = None) -> list[dict]:
     """Return the loans of one member, with the book of each loan 
-        and still-open loans first.
+    and still-open loans first.
     
-        Loans that are still out come first, then returned loans. Within each
-        group the newest loan comes first.
+    Loans that are still out come first, then returned loans. Within each 
+    group the newest loan comes first.
     
-        Args:
-            member_id: the member whose loans to list.
-            active: filter by loan status. True gives only loans that have not
-                been returned yet, False only returned loans, and None (the
-                default) the whole history.
-    
-        Returns:
-            A list of dicts with the keys ``loan_id``, ``loan_date``,
-            ``due_date``, ``return_date`` (None while the book is out),
-            ``overdue`` (True if the book is out and past its due date) and
-            ``book``, a dict in the same shape as the items of ``list_books()``.
-            The list is empty if the member has no matching loans or does not
-            exist.
-        """
+    Args:
+        member_id: the member whose loans to list.
+        active: filter by loan status. True gives only loans that have not 
+            been returned yet, False only returned loans, and None (the
+            default) the whole history.
+
+    Returns:
+        A list of dicts with the keys ``loan_id``, ``loan_date``,
+        ``due_date``, ``return_date`` (None while the book is out),
+        ``overdue`` (True if the book is out and past its due date) and
+        ``book``, a dict in the same shape as the items of ``list_books()``.
+        The list is empty if the member has no matching loans or does not
+        exist.
+    """
     conditions = ["l.member_id = ?"]
     if active is not None:
         conditions.append(
@@ -379,6 +380,208 @@ def get_member_data(member_id: int) -> dict | None:
     if row is None:
         return None
     return {"member": dict(row), "loans": list_member_loans(member_id)}
+
+
+def list_members(*, name: str | None = None) -> list[dict]:
+    """Return the members who are not anonymised, ordered by name.
+
+    Args:
+        name: if given, only members whose name contains this text
+            (case-insensitive for ASCII).
+    """
+    conditions = ["anonymised_at IS NULL"]
+    params = []
+    if name is not None:
+        conditions.append("name LIKE ? ESCAPE '\\'")
+        params.append(_like_pattern(name))
+    with connect() as conn:
+        rows = conn.execute(
+            "SELECT " + _MEMBER_COLUMNS + " FROM members "
+            "WHERE " + " AND ".join(conditions) + " "
+            "ORDER BY name COLLATE NOCASE, member_id",
+            params
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _select_member(conn, member_id: int) -> dict | None:
+    """Return one member by ID, or None. Callers pass an open connection."""
+    row = conn.execute(
+        "SELECT " + _MEMBER_COLUMNS + " FROM members WHERE member_id = ?", (member_id,)
+    ).fetchone()
+    return dict(row) if row is not None else None
+
+
+def get_member_by_id(member_id: int) -> dict | None:
+    """Return one member by ID, or None if there is no such ID."""
+    with connect() as conn:
+        return _select_member(conn, member_id)
+
+
+def _ensure_email_free(conn, email: str, *, own_member_id: int | None = None) -> None:
+    """Raise RuleViolation if another member already has this email.
+
+    The comparison ignores case, because the column is declared COLLATE NOCASE.
+    A member's own email does not count as taken.
+    """
+    row = conn.execute(
+        "SELECT member_id FROM members WHERE email = ?", (email,)
+    ).fetchone()
+    if row is not None and row["member_id"] != own_member_id:
+        raise RuleViolation("Another member already has this email address.")
+
+
+def new_card_number() -> str:
+    """Return a random card number made of capital letters and digits."""
+    return "".join(secrets.choice(CARD_ALPHABET) for _ in range(CARD_LENGTH))
+
+
+def _new_unused_card_number(conn) -> str:
+    """Return a card number that no member has. Callers pass an open
+    connection."""
+    while True:
+        card_number = new_card_number()
+        if conn.execute(
+            "SELECT 1 FROM members WHERE card_number = ?", (card_number,)
+        ).fetchone() is None:
+            return card_number
+
+
+def create_member(name: str, email: str, *, phone: str | None = None) -> dict:
+    """Register a member and return them, with their new card number.
+
+    The card number is made here and the join date is the column default,
+    so the caller chooses neither.
+
+    Raises:
+        RuleViolation: if another member already has this email.
+    """
+    with connect() as conn:
+        # Take the write lock first, so the email check and the insert
+        # cannot be interleaved with another request.
+        conn.execute("BEGIN IMMEDIATE")
+        _ensure_email_free(conn, email)
+        card_number = _new_unused_card_number(conn)
+        conn.execute(
+            "INSERT INTO members (card_number, name, email, phone) "
+            "VALUES (?, ?, ?, ?)",
+            (card_number, name, email, phone)
+        )
+        row = conn.execute(
+            "SELECT " + _MEMBER_COLUMNS + " FROM members WHERE card_number = ?",
+            (card_number,)
+        ).fetchone()
+    return {**dict(row), "card_number": card_number}
+
+
+def update_member(member_id: int, changes: dict) -> dict | None:
+    """Change a member's name, email or phone and return the member, or None.
+
+    Args:
+        member_id: the member to change.
+        changes: the new values, by column. Only the keys ``name``, ``email``
+            and ``phone`` are used; the card number and join date cannot be
+            changed. Columns that are not in ``changes`` stay as they are.
+
+    Returns:
+        The member after the change (same shape as ``get_member_by_id()``),
+        or None if there is no such member.
+
+    Raises:
+        RuleViolation: if the member is anonymised, or another member
+            already has the new email.
+    """
+    columns = [c for c in _EDITABLE_MEMBER_COLUMNS if c in changes]
+    with connect() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        member = _select_member(conn, member_id)
+        if member is None:
+            return None
+        if member["anonymised_at"] is not None:
+            raise RuleViolation("An anonymised member cannot be changed.")
+        if "email" in columns:
+            _ensure_email_free(conn, changes["email"], own_member_id=member_id)
+        if columns:
+            conn.execute(
+                "UPDATE members SET "
+                + ", ".join(column + " = ?" for column in columns)
+                + " WHERE member_id = ?",
+                [changes[column] for column in columns] + [member_id]
+            )
+            member = _select_member(conn, member_id)
+    return member
+
+
+def delete_member(member_id: int) -> dict | None:
+    """Delete a member who has never borrowed a book and return them, or None.
+
+    Returns:
+        The deleted member (same shape as ``get_member_by_id()``), or None
+        if there is no such member.
+
+    Raises:
+        RuleViolation: if the member has any loan, open or returned. The
+            loan history must stay, so such a member is anonymised instead.
+    """
+    with connect() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        member = _select_member(conn, member_id)
+        if member is None:
+            return None
+        if conn.execute(
+            "SELECT 1 FROM loans WHERE member_id = ?", (member_id,)
+        ).fetchone():
+            raise RuleViolation(
+                "This member has borrowing history and cannot be deleted. "
+                "Anonymise the member instead."
+            )
+        conn.execute("DELETE FROM members WHERE member_id = ?", (member_id,))
+    return member
+
+
+def anonymise_member(member_id: int) -> dict | None:
+    """Remove a member's personal data but keep their loan history.
+
+    The name and email are replaced by placeholders, the phone number is
+    cleared, the card is replaced by a new random one (so the old card stops
+    working) and ``anonymised_at`` is set to today. The loans stay, now
+    attached to an anonymous member.
+
+    Returns:
+        The member afterwards (same shape as ``get_member_by_id()``), or
+        None if there is no such member.
+
+    Raises:
+        RuleViolation: if the member is already anonymised or still has a
+            book on loan.
+    """
+    with connect() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        member = _select_member(conn, member_id)
+        if member is None:
+            return None
+        if member["anonymised_at"] is not None:
+            raise RuleViolation("This member is already anonymised.")
+        if conn.execute(
+            "SELECT 1 FROM loans WHERE member_id = ? AND return_date IS NULL",
+            (member_id,)
+        ).fetchone():
+            raise RuleViolation(
+                "This member still has a book on loan. Return all books first."
+            )
+        conn.execute(
+            "UPDATE members SET name = ?, email = ?, phone = NULL, "
+            "card_number = ?, anonymised_at = ? WHERE member_id = ?",
+            (
+                ANONYMISED_NAME,
+                f"anonymised-{secrets.token_hex(4)}@example.invalid",
+                _new_unused_card_number(conn),
+                date.today().isoformat(),
+                member_id,
+            )
+        )
+        member = _select_member(conn, member_id)
+    return member
 
 
 def find_book_by_isbn(isbn: str) -> dict | None:
