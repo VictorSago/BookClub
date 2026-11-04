@@ -61,10 +61,10 @@ def get_json(url, params=None, headers=None, timeout=5):
 def main():
     print("Welcome to your local library system!")
 
-    if user_session.is_loggedin() is False:
+    if not user_session.is_loggedin():
         login_service.user_login(get_json, BASE)
 
-    while user_session.is_loggedin() is True:
+    while user_session.is_loggedin():
         if user_session._userdata["role"] == "librarian":
             user_input = input_handlers.get_int_range(
                 MAIN_MENU_TEXT_LIBRARIAN,
