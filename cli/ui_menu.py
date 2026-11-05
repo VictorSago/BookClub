@@ -115,33 +115,40 @@ def add_book(post_json_func) -> None:
                 break
 
 
-def add_member():
+def add_member(post_json_func, base_url, api_key):
+
+    if user_session.get_userdata().role != "librarian":
+        print("You need to be a librarian to add new members.")
+        return
+
     print("\nAdd new member:\n")
     name = ""
     email = ""
     phone = ""
-    
+
     user_input = input_handlers.get_int_range("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
-    if user_input == 1: # ADD: Checks for typing errors - phone number
+    if user_input == 1:
         name = input_handlers.get_valid_text("Please type name of the new member: ", "Name cannot be empty.")
         email = input_handlers.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
         phone = input_handlers.get_valid_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
     else:
-        return
+        return None
 
-    print(name, email, phone) # EXCHANGE: with something like below when API is online
-'''
-    member = {
+    new_member = {
     "name": name,
     "email": email,
     "phone": phone
     }
 
-    response = requests.post(f"{BASE}/members", json=member, timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
-    return response.status_code
-'''
+    response, response_code = post_json_func(f"{base_url}/members", 
+                             json_data=new_member, 
+                             headers={"X-API-Key": api_key, 
+                                      "X-Card-Number": user_session.get_userdata().card_number}) # CHECK: that setup matches our API
 
+    if response_code == 201:       # Print the new member details if successfully added, else the post_json function already prints the error message
+        print(f"\nNew member added!\n\nID: {response.get('member_id')}\nName: {response.get('name')}\nCard number: {response.get('card_number')}\nEmail: {response.get('email')}\nPhone: {response.get('phone')}")
+    
 
 def show_my_data(get_json_func, base_url):
     print("\nShow my data:\n")
@@ -169,6 +176,23 @@ def show_my_data(get_json_func, base_url):
         print("")
 
 
+def show_one_member_data(get_json_func, base_url):
+    print("\nShow member data:\n")
+
+    member_id = input_handlers.get_valid_int("Please type the member ID of the member you want to see data for: ", "Member ID must be a valid integer.")
+
+    member_data = get_json_func(f"{base_url}/members/{member_id}", 
+                         headers={"X-API-Key": login_service.api_key, 
+                                  "X-Card-Number": user_session.get_userdata().card_number})
+    
+    if member_data is None:
+        print("Failed to retrieve member data.")  # Print on failure to interact with the API, get_jason() prints reason
+        return
+
+    for key, value in member_data.items():
+        print(f"{key}: {value}")
+
+
 def exit_program():
     # Shutdown sequence
     login_service.user_logout()
@@ -183,13 +207,13 @@ def admin_ui(get_json_func, post_json_func) -> None:
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
-            0, 2
+            0, 3
         )
         
         if user_input == 1:
             add_book(post_json_func)
         elif user_input == 2:
-            add_member()
+            add_member(post_json_func, base_url, api_key)
         elif user_input == 0:
             break
             
