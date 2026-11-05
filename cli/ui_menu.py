@@ -1,10 +1,13 @@
-from cli.constants import ADMIN_MENU_TEXT
+import os
+
+from cli.constants import ADMIN_MENU_TEXT, BASE
 from cli import input_handlers, user_session, login_service
-from cli.http_client import get_json, post_json, BASE, api_key
 from cli.stats_service import show_statistics_menu
 
 
-def show_books(get_json_func, base_url):
+def show_books(get_json_func):
+    base_url = BASE
+
     print("\nShow books:\n\nYou can search books by Title, Author, Publishing year or any combination.")
     print("If you do not want to use a specific search criteria you leave it blank.\n\n")
 
@@ -49,13 +52,17 @@ def borrow_book():
     print("\nBorrow a book:\n")
     pass
 
+
 def return_book():
     print("\nReturn a book:\n")
     pass
 
 
-def add_book() -> None:
+def add_book(post_json_func) -> None:
     """Interactively prompts the user for an ISBN, checks length, and sends it to the API."""
+    base_url = BASE
+    api_key = os.getenv("API_KEY", "")
+
     print("\nAdd Book from Open Library")
 
     while True:
@@ -87,10 +94,10 @@ def add_book() -> None:
             headers["X-Card-Number"] = str(current_user.card_number)
 
         payload = {"isbn": clean_isbn}
-        url = f"{BASE}/books/import"
+        url = f"{base_url}/books/import"
 
         # Send POST request to the API
-        result, status_code = post_json(url, json_data=payload, headers=headers)
+        result, status_code = post_json_func(url, json_data=payload, headers=headers)
 
         if status_code == 201 and result:
             print(f"\nSuccess! Added new book '{result['title']}' (ID: {result['book_id']}).")
@@ -170,7 +177,10 @@ def exit_program():
     exit()
 
 
-def admin_ui():
+def admin_ui(get_json_func, post_json_func) -> None:
+    api_key = os.getenv("API_KEY", "")
+    base_url = BASE
+
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
@@ -178,11 +188,11 @@ def admin_ui():
         )
         
         if user_input == 1:
-            add_book()
+            add_book(post_json_func)
         elif user_input == 2:
             add_member()
         elif user_input == 3:
-            show_statistics_menu()
+            show_statistics_menu(get_json_func)
         elif user_input == 0:
             break
             

@@ -1,3 +1,5 @@
+BASE = "http://127.0.0.1:8000"
+
 DATE_FORMAT = "%d.%m.%Y"
 DATE_FORMAT_DISPLAY = "DD.MM.YYYY"
 
