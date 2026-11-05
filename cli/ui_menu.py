@@ -196,8 +196,13 @@ def show_one_member_data(get_json_func):
         print("Failed to retrieve member data.")  # Print on failure to interact with the API, get_jason() prints reason
         return
 
+    loans = member_data.pop('loans')
+
     for key, value in member_data.items():
         print(f"{key}: {value}")
+
+    print(f"\nNumber of loans: {len(loans)}\n")
+
 
 def anonymize_member(post_json_func):
 
@@ -256,7 +261,7 @@ def admin_ui(get_json_func, post_json_func) -> None:
         elif user_input == 2:
             add_member(post_json_func)
         elif user_input == 3:
-            show_one_member_data(post_json_func) 
+            show_one_member_data(get_json_func)
         elif user_input == 4:
             anonymize_member(post_json_func)
         elif user_input == 5:
