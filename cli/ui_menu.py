@@ -183,15 +183,13 @@ def admin_ui(get_json_func, post_json_func) -> None:
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
-            0, 3
+            0, 2
         )
         
         if user_input == 1:
             add_book(post_json_func)
         elif user_input == 2:
             add_member()
-        elif user_input == 3:
-            show_statistics_menu(get_json_func)
         elif user_input == 0:
             break
             
