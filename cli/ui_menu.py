@@ -152,7 +152,9 @@ def add_member(post_json_func):
         print(f"\nNew member added!\n\nID: {response.get('member_id')}\nName: {response.get('name')}\nCard number: {response.get('card_number')}\nEmail: {response.get('email')}\nPhone: {response.get('phone')}")
     
 
-def show_my_data(get_json_func, base_url):
+def show_my_data(get_json_func):
+    base_url = BASE
+
     print("\nShow my data:\n")
 
     data = get_json_func(f"{base_url}/me/data", 
@@ -178,7 +180,9 @@ def show_my_data(get_json_func, base_url):
         print("")
 
 
-def show_one_member_data(get_json_func, base_url):
+def show_one_member_data(get_json_func):
+    base_url = BASE
+
     print("\nShow member data:\n")
 
     member_id = input_handlers.get_valid_int("Please type the member ID of the member you want to see data for: ", "Member ID must be a valid integer.")
@@ -203,19 +207,30 @@ def exit_program():
 
 
 def admin_ui(get_json_func, post_json_func) -> None:
-    api_key = os.getenv("API_KEY", "")
-    base_url = BASE
-
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
-            0, 3
+            0, 9
         )
         
         if user_input == 1:
             add_book(post_json_func)
         elif user_input == 2:
             add_member(post_json_func)
+        elif user_input == 3:
+            pass  # PLACEHOLDER: 
+        elif user_input == 4:
+            pass  # PLACEHOLDER: Update, Anonymize or delete member information
+        elif user_input == 5:
+            pass  # PLACEHOLDER: Update or delete book
+        elif user_input == 6:
+            pass  # PLACEHOLDER: Future functionality
+        elif user_input == 7:
+            pass  # PLACEHOLDER: Future functionality
+        elif user_input == 8:
+            pass  # PLACEHOLDER: Future functionality
+        elif user_input == 9:
+            pass  # PLACEHOLDER: Future functionality
         elif user_input == 0:
             break
             
