@@ -24,6 +24,5 @@ ADMIN_MENU_TEXT = (
     "\nAdministrator functions: \n"
     "1) Add book to library\n"
     "2) Register new member\n"
-    "3) Show statistics\n"
     "0) Exit to main menu\n"
 )
