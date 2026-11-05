@@ -19,9 +19,9 @@ def borrow_book() -> None:
         return
 
     card_number = (
-        user.get("cardnumber")
+        user.get("card_number")
         if isinstance(user, dict)
-        else getattr(user, "cardnumber", None)
+        else getattr(user, "card_number", None)
     )
 
     if not card_number:
