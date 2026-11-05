@@ -107,32 +107,40 @@ def add_book(post_json_func, base_url: str, api_key: str | None = None, card_num
                 break
 
 
-def add_member():
+def add_member(post_json_func, base_url, api_key):
+
+    if user_session.get_userdata().role != "librarian":
+        print("You need to be a librarian to add new members.")
+        return
+
     print("\nAdd new member:\n")
     name = ""
     email = ""
     phone = ""
-    
+
     user_input = input_handlers.get_int_range("Are you sure you want to create a new member? 1) Yes, 0) No: ", 0, 1)
 
-    if user_input == 1: # ADD: Checks for typing errors - phone number
+    if user_input == 1:
         name = input_handlers.get_valid_text("Please type name of the new member: ", "Name cannot be empty.")
         email = input_handlers.get_valid_email("Please type e-mail of the new member: ", "Invalid email format.")
         phone = input_handlers.get_valid_text("Please type phonenumber of the new member: ", "Phone number cannot be empty.")
     else:
-        return
+        return None
 
-    print(name, email, phone) # EXCHANGE: with something like below when API is online
-'''
-    member = {
+    new_member = {
     "name": name,
     "email": email,
     "phone": phone
     }
 
-    response = requests.post(f"{BASE}/members", json=member, timeout=5, headers={"X-API-Key": api_key}) # CHECK: that setup matches our API
-    return response.status_code
-'''
+    response, response_code = post_json_func(f"{base_url}/members", 
+                             json_data=new_member, 
+                             headers={"X-API-Key": api_key, 
+                                      "X-Card-Number": user_session.get_userdata().card_number}) # CHECK: that setup matches our API
+
+    if response_code == 201:       # Print the new member details if successfully added, else the post_json function already prints the error message
+        print(f"\nNew member added!\n\nID: {response.get('member_id')}\nName: {response.get('name')}\nCard number: {response.get('card_number')}\nEmail: {response.get('email')}\nPhone: {response.get('phone')}")
+    
 
 def show_my_data(get_json_func, base_url):
     print("\nShow my data:\n")
@@ -177,7 +185,7 @@ def admin_ui(post_json_func, base_url, api_key):
         if user_input == 1:
             add_book(post_json_func, base_url, api_key)
         elif user_input == 2:
-            add_member()
+            add_member(post_json_func, base_url, api_key)
         elif user_input == 0:
             break
             
