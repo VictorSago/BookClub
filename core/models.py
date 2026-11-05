@@ -92,8 +92,17 @@ class MemberUpdate(BaseModel):
         return self
 
 
-class OverdueLoanOut(LoanOut):
-    member: MemberOut
+class OverdueLoanOut(BaseModel):
+    loan_id: int
+    book_id: int
+    title: str
+    member_id: int
+    member_name: str
+    email: str
+    phone: str | None = None
+    loan_date: str
+    due_date: str
+    days_overdue: int
 
 
 class MostBorrowedOut(BookOut):
