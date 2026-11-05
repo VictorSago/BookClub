@@ -3,6 +3,7 @@
 import os
 
 import requests
+from cli import user_session
 from dotenv import load_dotenv
 
 from . import input_handlers
@@ -12,9 +13,15 @@ load_dotenv(".env", override=True)
 BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 TIMEOUT = 5
 
-def return_book(card_number):
+def return_book():
     """Display a member's active loans and return the selected loan."""
     api_key = os.getenv("API_KEY")
+
+    card_number = None
+    user = user_session.get_userdata()
+    if user and user.card_number:
+        card_number = user.card_number
+
     if not api_key:
         print("\nAPI key is not configured.")
         return
@@ -83,7 +90,7 @@ def return_book(card_number):
             
             # Update the loan through the backend's PATCH endpoint.
             
-            response = requests.patch(
+            response = requests.post(
             f"{BASE}/me/loans/{loan_id}/return",
             headers=headers,
             timeout=TIMEOUT,

@@ -4,6 +4,7 @@ from cli.constants import ADMIN_MENU_TEXT, BASE
 from cli import input_handlers, user_session, login_service
 from cli.stats_service import show_statistics_menu
 from cli.borrow_ui import borrow_book as borrow_book_cli
+from cli.return_book import return_book as return_book_cli
 import requests
 
 def show_books(get_json_func):
@@ -54,8 +55,9 @@ def borrow_book():
     borrow_book_cli()
 
 def return_book():
-    print("\nReturn a book:\n")
-    pass
+    """Open the Return Book feature."""
+    return_book_cli()
+    
 
 
 def add_book(post_json_func) -> None:
