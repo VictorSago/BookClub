@@ -190,11 +190,13 @@ def delete_member(base_url, api_key):
 
     member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to delete: ", "Member ID must be a valid integer.")
 
-    response, response_code = requests.delete(f"{base_url}/members/{member_id}",
-                              headers={"X-API-Key": api_key, 
-                                    "X-Card-Number": user_session.get_userdata().card_number})
-
-    print(response, response_code)
+    response = requests.delete(f"{base_url}/members/{member_id}",
+                                              headers={"X-API-Key": api_key, 
+                                                       "X-Card-Number": user_session.get_userdata().card_number})
+    try:
+        print(response.json()['detail'])
+    except requests.exceptions.JSONDecodeError:
+        print(f"Member {member_id} successfully deleted")
 
     print("")
 
