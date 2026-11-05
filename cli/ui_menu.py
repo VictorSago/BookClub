@@ -4,6 +4,7 @@ from cli.constants import ADMIN_MENU_TEXT, BASE
 from cli import input_handlers, user_session, login_service
 from cli.stats_service import show_statistics_menu
 from cli.borrow_ui import borrow_book as borrow_book_cli
+import requests
 
 def show_books(get_json_func):
     base_url = BASE
@@ -198,6 +199,43 @@ def show_one_member_data(get_json_func):
     for key, value in member_data.items():
         print(f"{key}: {value}")
 
+def anonymize_member(post_json_func):
+
+    base_url = BASE
+    api_key = os.getenv("API_KEY", "")
+    
+    print("\nAnonymize member data:\n")
+
+    member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to anonymize: ", "Member ID must be a valid integer.")
+
+    response, response_code = post_json_func(f"{base_url}/members/{member_id}/anonymise",
+                              json_data=member_id,
+                              headers={"X-API-Key": api_key, 
+                                    "X-Card-Number": user_session.get_userdata().card_number})
+
+    if response_code == 200:
+        print(f"Member anonymiziation of member {response['member_id']} successful")
+
+    print("")
+
+def delete_member():
+
+    base_url = BASE
+    api_key = os.getenv("API_KEY", "")
+
+    print("\nDelete member:\n")
+
+    member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to delete: ", "Member ID must be a valid integer.")
+
+    response = requests.delete(f"{base_url}/members/{member_id}",
+                                              headers={"X-API-Key": api_key, 
+                                                       "X-Card-Number": user_session.get_userdata().card_number})
+    try:
+        print(response.json()['detail'])
+    except requests.exceptions.JSONDecodeError:
+        print(f"Member {member_id} successfully deleted")
+
+    print("")
 
 def exit_program():
     # Shutdown sequence
@@ -218,13 +256,13 @@ def admin_ui(get_json_func, post_json_func) -> None:
         elif user_input == 2:
             add_member(post_json_func)
         elif user_input == 3:
-            pass  # PLACEHOLDER: 
+            show_one_member_data(post_json_func) 
         elif user_input == 4:
-            pass  # PLACEHOLDER: Update, Anonymize or delete member information
+            anonymize_member(post_json_func)
         elif user_input == 5:
-            pass  # PLACEHOLDER: Update or delete book
+            delete_member()
         elif user_input == 6:
-            pass  # PLACEHOLDER: Future functionality
+            pass  # PLACEHOLDER: Update or delete book
         elif user_input == 7:
             pass  # PLACEHOLDER: Future functionality
         elif user_input == 8:
