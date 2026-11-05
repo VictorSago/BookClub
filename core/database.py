@@ -785,18 +785,23 @@ def list_overdue_loans() -> list[dict]:
     before today.
 
     Returns:
-        A list of dicts in the shape of the items of ``list_member_loans()``,
-        each with one more key, ``member``: the borrower, as a dict in the
-        shape of ``get_member_by_id()``.
+        A list of dicts with the keys ``loan_id``, ``book_id``, ``title``,
+        ``member_id``, ``member_name``, ``email``, ``phone``, ``loan_date``,
+        ``due_date`` and ``days_overdue``.
     """
     with connect() as conn:
-        loan_rows = conn.execute(
-            "SELECT l.loan_id, l.book_id, l.member_id, l.loan_date, "
-            "l.due_date, l.return_date, " + _OVERDUE + " AS overdue "
-            "FROM loans l WHERE " + _OVERDUE + " "
+        rows = conn.execute(
+            "SELECT l.loan_id, l.book_id, b.title, l.member_id, "
+            "m.name AS member_name, m.email, m.phone, l.loan_date, "
+            "l.due_date, CAST(julianday(date('now', 'localtime')) "
+            "- julianday(l.due_date) AS INTEGER) AS days_overdue "
+            "FROM loans l "
+            "JOIN books b ON b.book_id = l.book_id "
+            "JOIN members m ON m.member_id = l.member_id "
+            "WHERE " + _OVERDUE + " "
             "ORDER BY l.due_date, l.loan_id"
         ).fetchall()
-        return _attach_members(conn, _attach_books(conn, loan_rows))
+    return [dict(row) for row in rows]
 
 
 def most_borrowed_books(*, limit: int) -> list[dict]:
@@ -840,6 +845,6 @@ def never_borrowed_books() -> list[dict]:
     with connect() as conn:
         return _select_books(
             conn,
-            " WHERE NOT EXISTS "
-            "(SELECT 1 FROM loans l WHERE l.book_id = b.book_id)"
+            " LEFT JOIN loans l ON l.book_id = b.book_id"
+            " WHERE l.loan_id IS NULL"
         )

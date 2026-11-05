@@ -88,23 +88,33 @@ def main():
         if user_session.get_userdata().role == "librarian":
             user_input = input_handlers.get_int_range(
                 MAIN_MENU_TEXT_LIBRARIAN,
-                0, 4
+                0, 9
                 )
             if user_input == 1:
-                admin_ui(post_json, BASE, api_key)
+                admin_ui(post_json, get_json, BASE, api_key)
             elif user_input == 2:
                 show_books(get_json, BASE)
             elif user_input == 3:
                 borrow_book()
             elif user_input == 4:
                 return_book()
+            elif user_input == 5:
+                pass  # Placeholder STATISTICS functionality
+            elif user_input == 6:
+                pass  # Placeholder SHOW MY DATA functionality
+            elif user_input == 7:
+                pass  # Placeholder for future functionality
+            elif user_input == 8:
+                pass  # Placeholder for future functionality
+            elif user_input == 9:
+                pass  # Placeholder for future functionality
             elif user_input == 0:
                 exit_program()
 
         else:
             user_input = input_handlers.get_int_range(
                 MAIN_MENU_TEXT_MEMBER,
-                0, 4
+                0, 9
                 )
             if user_input == 2:
                 show_books(get_json, BASE)
@@ -112,6 +122,16 @@ def main():
                 borrow_book()
             elif user_input == 4:
                 return_book()
+            elif user_input == 5:
+                pass  # Placeholder STATISTICS functionality
+            elif user_input == 6:
+                pass  # Placeholder SHOW MY DATA functionality
+            elif user_input == 7:
+                pass  # Placeholder for future functionality
+            elif user_input == 8:
+                pass  # Placeholder for future functionality
+            elif user_input == 9:
+                pass  # Placeholder for future functionality
             elif user_input == 0:
                 exit_program()
 
