@@ -25,12 +25,15 @@ class WhoAmIOut(BaseModel):
     name: str
 
 
-class LoanOut(BaseModel):
+class LoanBase(BaseModel):
     loan_id: int
     loan_date: str
     due_date: str
     return_date: str | None = None
     overdue: bool
+    
+    
+class LoanOut(LoanBase):
     book: BookOut
 
 
@@ -45,6 +48,14 @@ class MemberOut(BaseModel):
 
 class MemberDataOut(MemberOut):
     card_number: str
+
+
+class MemberDetailOut(MemberOut):
+    loans: list[LoanOut]
+
+
+class LoanWithMemberOut(LoanBase):
+    member: MemberOut
 
 
 class MyDataOut(BaseModel):
@@ -79,3 +90,20 @@ class MemberUpdate(BaseModel):
             if field in self.model_fields_set and getattr(self, field) is None:
                 raise ValueError(f"{field} cannot be null.")
         return self
+
+
+class OverdueLoanOut(BaseModel):
+    loan_id: int
+    book_id: int
+    title: str
+    member_id: int
+    member_name: str
+    email: str
+    phone: str | None = None
+    loan_date: str
+    due_date: str
+    days_overdue: int
+
+
+class MostBorrowedOut(BookOut):
+    loan_count: int
