@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import FastAPI, Query, HTTPException, Response, status
 
-from core import database, models, external_api
+from core import database, db_loans, db_members, models, external_api
 from core.auth import CurrentMember, CurrentLibrarian
 
 
@@ -41,7 +41,7 @@ def get_book_loans(
         Query(description="true: out now; false: returned; omit: all")
         ] = None
     ):
-    loans = database.list_book_loans(book_id, active=active)
+    loans = db_loans.list_book_loans(book_id, active=active)
     if loans is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return loans
@@ -50,8 +50,8 @@ def get_book_loans(
 @app.post("/books/import", response_model=models.BookOut, status_code=201)
 def import_book(
     payload: models.BookImportCreate,
-    librarian: CurrentLibrarian,
-    response: Response,
+    _librarian: CurrentLibrarian,
+    _response: Response,
 ):
     """Import a book by ISBN from Open Library or return existing local copy."""
     # Clean and validate ISBN format
@@ -106,13 +106,13 @@ def get_my_loans(
         Query(description="true: not yet returned; false: returned; omit: all")
         ] = None
     ):
-    return database.list_member_loans(member["member_id"], active=active)
+    return db_loans.list_member_loans(member["member_id"], active=active)
 
 
 @app.post("/me/loans", response_model=models.LoanOut, status_code=201)
 def create_my_loan(body: models.LoanCreate, member: CurrentMember):
     try:
-        loan = database.borrow_book(member["member_id"], body.book_id)
+        loan = db_loans.borrow_book(member["member_id"], body.book_id)
     except database.RuleViolation as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     if loan is None:
@@ -123,7 +123,7 @@ def create_my_loan(body: models.LoanCreate, member: CurrentMember):
 @app.post("/me/loans/{loan_id}/return", response_model=models.LoanOut)
 def return_my_loan(loan_id: int, member: CurrentMember):
     try:
-        loan = database.return_book(member["member_id"], loan_id)
+        loan = db_loans.return_book(member["member_id"], loan_id)
     except database.RuleViolation as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     if loan is None:
@@ -133,7 +133,7 @@ def return_my_loan(loan_id: int, member: CurrentMember):
 
 @app.get("/me/data", response_model=models.MyDataOut)
 def get_my_data(member: CurrentMember):
-    data = database.get_member_data(member["member_id"])
+    data = db_loans.get_member_data(member["member_id"])
     if data is None:
         raise HTTPException(status_code=404, detail="Member not found")
     return data
@@ -146,7 +146,7 @@ def delete_me(member: CurrentMember):
             status_code=403, detail="Librarian accounts cannot remove themselves"
         )
     try:
-        removed = database.delete_or_anonymise_member(member["member_id"])
+        removed = db_members.delete_or_anonymise_member(member["member_id"])
     except database.RuleViolation as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     if removed is None:
@@ -158,12 +158,12 @@ def get_members(
     _librarian: CurrentLibrarian, 
     name: Annotated[str | None, Query(description="Name contains this text")] = None
     ):
-    return database.list_members(name=name)
+    return db_members.list_members(name=name)
 
 
 @app.get("/members/{member_id}", response_model=models.MemberDetailOut)
 def get_member(member_id: int, _librarian: CurrentLibrarian):
-    member = database.get_member_with_loans(member_id)
+    member = db_loans.get_member_with_loans(member_id)
     if member is None:
         raise HTTPException(status_code=404, detail="Member not found")
     return member
@@ -172,14 +172,14 @@ def get_member(member_id: int, _librarian: CurrentLibrarian):
 @app.post("/members", response_model=models.MemberDataOut, status_code=201)
 def create_member(body: models.MemberCreate, _librarian: CurrentLibrarian):
     try:
-        return database.create_member(body.name, body.email, phone=body.phone)
+        return db_members.create_member(body.name, body.email, phone=body.phone)
     except database.RuleViolation as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
 
 
 def _apply_member_update(member_id: int, changes: dict) -> dict:
     try:
-        member = database.update_member(member_id, changes)
+        member = db_members.update_member(member_id, changes)
     except database.RuleViolation as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     if member is None:
@@ -200,7 +200,7 @@ def patch_member(member_id: int, body: models.MemberUpdate, _librarian: CurrentL
 @app.delete("/members/{member_id}", status_code=204)
 def delete_member(member_id: int, _librarian: CurrentLibrarian):
     try:
-        member = database.delete_member(member_id)
+        member = db_members.delete_member(member_id)
     except database.RuleViolation as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     if member is None:
@@ -210,7 +210,7 @@ def delete_member(member_id: int, _librarian: CurrentLibrarian):
 @app.post("/members/{member_id}/anonymise", response_model=models.MemberOut)
 def anonymise_member(member_id: int, _librarian: CurrentLibrarian):
     try:
-        member = database.anonymise_member(member_id)
+        member = db_members.anonymise_member(member_id)
     except database.RuleViolation as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     if member is None:
@@ -220,7 +220,7 @@ def anonymise_member(member_id: int, _librarian: CurrentLibrarian):
 
 @app.get("/loans/overdue", response_model=list[models.OverdueLoanOut])
 def get_overdue_loans(_librarian: CurrentLibrarian):
-    return database.list_overdue_loans()
+    return db_loans.list_overdue_loans()
 
 
 @app.get("/stats/most-borrowed", response_model=list[models.MostBorrowedOut])
