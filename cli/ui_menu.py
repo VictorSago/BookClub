@@ -199,7 +199,11 @@ def show_one_member_data(get_json_func):
     for key, value in member_data.items():
         print(f"{key}: {value}")
 
-def anonymize_member(post_json_func, base_url, api_key):
+def anonymize_member(post_json_func):
+
+    base_url = BASE
+    api_key = os.getenv("API_KEY", "")
+    
     print("\nAnonymize member data:\n")
 
     member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to anonymize: ", "Member ID must be a valid integer.")
@@ -214,8 +218,11 @@ def anonymize_member(post_json_func, base_url, api_key):
 
     print("")
 
+def delete_member():
 
-def delete_member(base_url, api_key):
+    base_url = BASE
+    api_key = os.getenv("API_KEY", "")
+
     print("\nDelete member:\n")
 
     member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to delete: ", "Member ID must be a valid integer.")
@@ -249,13 +256,13 @@ def admin_ui(get_json_func, post_json_func) -> None:
         elif user_input == 2:
             add_member(post_json_func)
         elif user_input == 3:
-            pass  # PLACEHOLDER: 
+            show_one_member_data(post_json_func) 
         elif user_input == 4:
-            pass  # PLACEHOLDER: Update, Anonymize or delete member information
+            anonymize_member(post_json_func)
         elif user_input == 5:
-            pass  # PLACEHOLDER: Update or delete book
+            delete_member()
         elif user_input == 6:
-            pass  # PLACEHOLDER: Future functionality
+            pass  # PLACEHOLDER: Update or delete book
         elif user_input == 7:
             pass  # PLACEHOLDER: Future functionality
         elif user_input == 8:
