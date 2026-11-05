@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyHeader
 
-from core import database
+from core import db_members
 
 load_dotenv()
 
@@ -56,7 +56,7 @@ def get_current_member(
             or if the card is missing, unknown or belongs to an anonymised
             member.
     """
-    member = database.find_member_by_card(card) if card else None
+    member = db_members.find_member_by_card(card) if card else None
     if member is None:
         raise HTTPException(status_code=401, detail="Unknown card")
     role = "librarian" if member["card_number"] in LIBRARIAN_CARDS else "member"
