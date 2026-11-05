@@ -115,8 +115,10 @@ def add_book(post_json_func) -> None:
                 break
 
 
-def add_member(post_json_func, base_url, api_key):
-
+def add_member(post_json_func):
+    base_url = BASE
+    api_key = os.getenv("API_KEY", "")
+    
     if user_session.get_userdata().role != "librarian":
         print("You need to be a librarian to add new members.")
         return
@@ -213,7 +215,7 @@ def admin_ui(get_json_func, post_json_func) -> None:
         if user_input == 1:
             add_book(post_json_func)
         elif user_input == 2:
-            add_member(post_json_func, base_url, api_key)
+            add_member(post_json_func)
         elif user_input == 0:
             break
             

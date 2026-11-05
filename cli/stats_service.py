@@ -44,7 +44,7 @@ def _show_top_borrowed_books(get_json_func) -> None:
     if not books:
         print("No borrowing history found.")
     else:
-        for index, book in enumerate(books, start=1): #TODO: sync with backend
+        for index, book in enumerate(books, start=1):
             title = book.get("title", "Unknown")
             authors = book.get("authors") or []
             authors_str = ", ".join(authors) if authors else "Unknown Author"
@@ -66,7 +66,7 @@ def _show_never_borrowed_books(get_json_func) -> None:
         print("All books in the catalog have been borrowed at least once.")
     else:
         print(f"Found {len(books)} unborrowed book(s):")
-        for index, book in enumerate(books, start=1):  #TODO: sync with backend
+        for index, book in enumerate(books, start=1):
             title = book.get("title", "Unknown")
             authors = book.get("authors") or []
             authors_str = ", ".join(authors) if authors else "Unknown Author"
