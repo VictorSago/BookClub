@@ -4,6 +4,7 @@ from cli.constants import ADMIN_MENU_TEXT, BASE
 from cli import input_handlers, user_session, login_service
 from cli.stats_service import show_statistics_menu
 from cli.borrow_ui import borrow_book as borrow_book_cli
+import requests
 
 def show_books(get_json_func):
     base_url = BASE
