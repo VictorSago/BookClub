@@ -171,13 +171,27 @@ def admin_ui(post_json_func, base_url, api_key):
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
-            0, 2
+            0, 9
         )
         
         if user_input == 1:
             add_book(post_json_func, base_url, api_key)
         elif user_input == 2:
             add_member()
+        elif user_input == 3:
+            pass  # PLACEHOLDER: Update, Anonymize or delete member information
+        elif user_input == 4:
+            pass  # PLACEHOLDER: Update or delete book
+        elif user_input == 5:
+            pass  # PLACEHOLDER: Future functionality
+        elif user_input == 6:
+            pass  # PLACEHOLDER: Future functionality
+        elif user_input == 7:
+            pass  # PLACEHOLDER: Future functionality
+        elif user_input == 8:
+            pass  # PLACEHOLDER: Future functionality
+        elif user_input == 9:
+            pass  # PLACEHOLDER: Future functionality
         elif user_input == 0:
             break
             
