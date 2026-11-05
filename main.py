@@ -23,14 +23,19 @@ def get_books(
     ):
     return database.list_books(title=title, year=year, author=author, available=available)
 
+<<<<<<< HEAD
 
 @app.get("/books/{book_id}", response_model=models.BookOut)
+=======
+@app.get("/books/{book_id}", response_model=BookOut)
+>>>>>>> feature/borrow_ui
 def get_book(book_id: int):
     book = database.get_book_by_id(book_id)
     if book is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return book
 
+<<<<<<< HEAD
 
 @app.get("/books/{book_id}/loans", response_model=list[models.LoanWithMemberOut])
 def get_book_loans(
@@ -99,6 +104,13 @@ def whoami(member: CurrentMember):
 
 
 @app.get("/me/loans", response_model=list[models.LoanOut])
+=======
+@app.get("/whoami", response_model=WhoAmIOut)
+def whoami(member: CurrentMember):
+    return member
+
+@app.get("/me/loans", response_model=list[LoanOut])
+>>>>>>> feature/borrow_ui
 def get_my_loans(
     member: CurrentMember, 
     active: Annotated[

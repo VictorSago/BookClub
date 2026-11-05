@@ -78,16 +78,21 @@ def return_book(card_number):
             if confirm != "y":
                 print("Return cancelled.")
                 return
-
-            # Update the loan through the backend's PATCH endpoint.
             
             # Update the loan through the backend's PATCH endpoint.
-            
             response = requests.patch(
-            f"{BASE}/me/loans/{loan_id}/return",
-            headers=headers,
-            timeout=TIMEOUT,
+                f"{BASE}/me/loans/{loan_id}/return",
+                headers=headers,
+                timeout=TIMEOUT,
             )
+
+            if response.status_code >= 400:
+                try:
+                    err_detail = response.json().get("detail", "Unknown error")
+                except Exception:
+                    err_detail = response.text
+                print(f"\nError: {err_detail}")
+                return
 
             response.raise_for_status()
             returned_loan = response.json()
