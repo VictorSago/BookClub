@@ -261,14 +261,6 @@ def admin_ui(get_json_func, post_json_func) -> None:
             anonymize_member(post_json_func)
         elif user_input == 5:
             delete_member()
-        elif user_input == 6:
-            pass  # PLACEHOLDER: Update or delete book
-        elif user_input == 7:
-            pass  # PLACEHOLDER: Future functionality
-        elif user_input == 8:
-            pass  # PLACEHOLDER: Future functionality
-        elif user_input == 9:
-            pass  # PLACEHOLDER: Future functionality
         elif user_input == 0:
             break
             

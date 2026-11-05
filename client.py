@@ -10,6 +10,7 @@ from cli.ui_menu import (
     show_books,
     borrow_book,
     return_book,
+    show_my_data,
     admin_ui,
     exit_program,
 )
@@ -102,13 +103,7 @@ def main():
             elif user_input == 5:
                 show_statistics_menu(get_json)
             elif user_input == 6:
-                pass  # Placeholder SHOW MY DATA functionality
-            elif user_input == 7:
-                pass  # Placeholder for future functionality
-            elif user_input == 8:
-                pass  # Placeholder for future functionality
-            elif user_input == 9:
-                pass  # Placeholder for future functionality
+                show_my_data(get_json)
             elif user_input == 0:
                 exit_program()
 
@@ -126,13 +121,7 @@ def main():
             elif user_input == 5:
                 show_statistics_menu(get_json)
             elif user_input == 6:
-                pass  # Placeholder SHOW MY DATA functionality
-            elif user_input == 7:
-                pass  # Placeholder for future functionality
-            elif user_input == 8:
-                pass  # Placeholder for future functionality
-            elif user_input == 9:
-                pass  # Placeholder for future functionality
+                show_my_data(get_json)
             elif user_input == 0:
                 exit_program()
 
