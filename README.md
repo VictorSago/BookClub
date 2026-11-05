@@ -19,10 +19,12 @@ _A short description of project organization_
 BookClub/
 ├── main.py
 ├── client.py
-├── auth.py
 ├── core/
 │   ├── __init__.py
+│   ├── auth.py
 │   ├── database.py
+│   ├── db_members.py
+│   ├── db_loans.py
 │   ├── models.py
 │   ├── schema.sql
 │   ├── seed.py
@@ -31,13 +33,18 @@ BookClub/
 ├── cli/
 │   ├── constants.py
 │   ├── input_handlers.py
+│   ├── borrow_ui.py
+│   ├── ui_menu.py
+│   ├── return_book.py
+│   ├── stats_service.py
 │   ├── user_session.py
-│   └── ...other helpers
+│   └── login_service.py
 ├── docs/
 │   ├── api.md
 │   ├── daily.md
 │   ├── ER-diagram.png
-│   └── ...other documents
+│   ├── retro_sprint-1.md
+│   └── retro_sprint-2.md
 ├── .env.example
 ├── .gitignore
 ├── README.md
