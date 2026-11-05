@@ -76,3 +76,39 @@ Tasks:
 - Mohana: Borrow book function
 - Maryna: Add book function
 - Christofer: UI Login function
+
+## 2026-11-03
+
+On yesterday:
+
+- Tricky day with new file structure
+- Login fuctionality work
+- Add book functionality works
+- We had an external person accessing our GitHub, resolved with teachers
+- We need to syncronise a bit better
+- Borrowing and return books works from backend side
+
+Tasks:
+
+- Maryna: Testing
+- Christofer: Add member (client side)
+- Mohana: Borrowing book (client side), returning books
+- Victor: Add member (backend)
+
+## 2026-11-04
+
+On yesterday:
+
+- A lot added to API, all roots for member manipulation
+- UI update in PR
+- Add books in PR
+- Borrow books flow ready
+- We need the PRs merged to main
+
+Tasks:
+
+- All: review PRs. Merge order for PRs has been set.
+- Mohana: Borrow books, Return books
+- Victor: Statistics backend
+- Christofer: Review project pdf and discuss with Maryna, Anonymize and remove member UI functions
+- Maryna: Statistics client, Review project pdf and Discuss with Christofer.
