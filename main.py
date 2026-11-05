@@ -130,6 +130,20 @@ def get_my_data(member: CurrentMember):
     return data
 
 
+@app.delete("/me", status_code=204)
+def delete_me(member: CurrentMember):
+    if member["role"] == "librarian":
+        raise HTTPException(
+            status_code=403, detail="Librarian accounts cannot remove themselves"
+        )
+    try:
+        removed = database.delete_or_anonymise_member(member["member_id"])
+    except database.RuleViolation as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if removed is None:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+
 @app.get("/members", response_model=list[MemberOut])
 def get_members(
     _librarian: CurrentLibrarian, 
