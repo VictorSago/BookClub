@@ -48,8 +48,8 @@ def _show_top_borrowed_books(get_json_func) -> None:
             title = book.get("title", "Unknown")
             authors = book.get("authors") or []
             authors_str = ", ".join(authors) if authors else "Unknown Author"
-            count = book.get("borrow_count", 0)
-            print(f"{index}. {title}  by {authors_str} — borrowed {count} time(s)")
+            count = book.get("loan_count", 0)
+            print(f"{index}. {title} by {authors_str} — borrowed {count} time(s)")
 
 
 def _show_never_borrowed_books(get_json_func) -> None:
@@ -58,7 +58,7 @@ def _show_never_borrowed_books(get_json_func) -> None:
     print("\n--- Books Never Borrowed ---")
 
     headers = _get_headers()
-    books = get_json_func(f"{base_url}/stats/never-borrowed", headers=headers,timeout=10)
+    books = get_json_func(f"{base_url}/stats/never-borrowed", headers=headers, timeout=10)
     if books is None:
         return
 
