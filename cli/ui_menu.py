@@ -1,8 +1,13 @@
-from cli.constants import ADMIN_MENU_TEXT
+import os
+
+from cli.constants import ADMIN_MENU_TEXT, BASE
 from cli import input_handlers, user_session, login_service
+from cli.stats_service import show_statistics_menu
 from cli.borrow_ui import borrow_book as borrow_book_cli
 
-def show_books(get_json_func, base_url):
+def show_books(get_json_func):
+    base_url = BASE
+
     print("\nShow books:\n\nYou can search books by Title, Author, Publishing year or any combination.")
     print("If you do not want to use a specific search criteria you leave it blank.\n\n")
 
@@ -52,8 +57,11 @@ def return_book():
     pass
 
 
-def add_book(post_json_func, base_url: str, api_key: str | None = None, card_number: str | int | None = None) -> None:
+def add_book(post_json_func) -> None:
     """Interactively prompts the user for an ISBN, checks length, and sends it to the API."""
+    base_url = BASE
+    api_key = os.getenv("API_KEY", "")
+
     print("\nAdd Book from Open Library")
 
     while True:
@@ -107,8 +115,10 @@ def add_book(post_json_func, base_url: str, api_key: str | None = None, card_num
                 break
 
 
-def add_member(post_json_func, base_url, api_key):
-
+def add_member(post_json_func):
+    base_url = BASE
+    api_key = os.getenv("API_KEY", "")
+    
     if user_session.get_userdata().role != "librarian":
         print("You need to be a librarian to add new members.")
         return
@@ -142,7 +152,9 @@ def add_member(post_json_func, base_url, api_key):
         print(f"\nNew member added!\n\nID: {response.get('member_id')}\nName: {response.get('name')}\nCard number: {response.get('card_number')}\nEmail: {response.get('email')}\nPhone: {response.get('phone')}")
     
 
-def show_my_data(get_json_func, base_url):
+def show_my_data(get_json_func):
+    base_url = BASE
+
     print("\nShow my data:\n")
 
     data = get_json_func(f"{base_url}/me/data", 
@@ -168,7 +180,9 @@ def show_my_data(get_json_func, base_url):
         print("")
 
 
-def show_one_member_data(get_json_func, base_url):
+def show_one_member_data(get_json_func):
+    base_url = BASE
+
     print("\nShow member data:\n")
 
     member_id = input_handlers.get_valid_int("Please type the member ID of the member you want to see data for: ", "Member ID must be a valid integer.")
@@ -192,7 +206,7 @@ def exit_program():
     exit()
 
 
-def admin_ui(post_json_func, get_json_func, base_url, api_key):
+def admin_ui(get_json_func, post_json_func) -> None:
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
@@ -200,9 +214,9 @@ def admin_ui(post_json_func, get_json_func, base_url, api_key):
         )
         
         if user_input == 1:
-            add_book(post_json_func, base_url, api_key)
+            add_book(post_json_func)
         elif user_input == 2:
-            add_member(post_json_func, base_url, api_key)
+            add_member(post_json_func)
         elif user_input == 3:
             pass  # PLACEHOLDER: 
         elif user_input == 4:
