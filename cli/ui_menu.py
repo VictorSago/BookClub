@@ -160,6 +160,12 @@ def show_my_data(get_json_func, base_url):
         print("")
 
 
+def update_member_data():
+    print("\nUpdate member data:\n")
+    pass
+
+
+
 def exit_program():
     # Shutdown sequence
     login_service.user_logout()
