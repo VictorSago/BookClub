@@ -16,7 +16,7 @@
 | anyone | GET /books/{book_id} | 200 | Book availability | Done |
 | anyone | GET /whoami | 200 | Authenticate and authorize a user | Done |
 | librarian | POST /books | 201 | Add a book by hand | Planned |
-| librarian | POST /books/import | 201 | Add a book from Open Library | Planned |
+| librarian | POST /books/import | 201 | Add a book from Open Library | Done |
 | librarian | PUT, PATCH /books/{book_id} | 200 | Edit a book | Planned |
 | librarian | DELETE /books/{book_id} | 204 | Remove a book | Planned |
 | librarian | GET /members | 200 | Find a member | Done |
@@ -25,14 +25,14 @@
 | librarian | PUT, PATCH /members/{member_id} | 200 | Edit a member | Done |
 | librarian | DELETE /members/{member_id} | 204 | Remove a member without loans | Done |
 | librarian | POST /members/{member_id}/anonymise | 200 | Anonymise a member | Done |
-| librarian | GET /loans/overdue | 200 | Overdue loans | Planned |
-| librarian | GET /stats/most-borrowed | 200 | Most borrowed | Planned |
-| librarian | GET /stats/never-borrowed | 200 | Never borrowed | Planned |
+| librarian | GET /loans/overdue | 200 | Overdue loans | Done |
+| librarian | GET /stats/most-borrowed | 200 | Most borrowed | Done |
+| librarian | GET /stats/never-borrowed | 200 | Never borrowed | Done |
 | member | GET /me/loans | 200 | My borrowed books | Done |
 | member | POST /me/loans (body: book_id) | 201 | Borrow | Done |
 | member | POST /me/loans/{loan_id}/return | 200 | Return | Done |
 | member | GET /me/data | 200 | What do you have about me? | Done |
-| member | DELETE /me | 204 | Delete me (anonymise) | Planned |
+| member | DELETE /me | 204 | Delete me (anonymise) | Done |
 
 The statistics routes live under `/stats` so that they can't be swallowed by
 `/books/{book_id}`.
