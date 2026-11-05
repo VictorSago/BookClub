@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from cli.constants import MAIN_MENU_TEXT_LIBRARIAN, MAIN_MENU_TEXT_MEMBER
 from cli import input_handlers, user_session, login_service
+from cli.stats_service import show_statistics_menu
 from cli.ui_menu import (
     show_books,
     borrow_book,
@@ -99,7 +100,7 @@ def main():
             elif user_input == 4:
                 return_book()
             elif user_input == 5:
-                pass  # Placeholder STATISTICS functionality
+                show_statistics_menu(get_json)
             elif user_input == 6:
                 pass  # Placeholder SHOW MY DATA functionality
             elif user_input == 7:
@@ -123,7 +124,7 @@ def main():
             elif user_input == 4:
                 return_book()
             elif user_input == 5:
-                pass  # Placeholder STATISTICS functionality
+                show_statistics_menu(get_json)
             elif user_input == 6:
                 pass  # Placeholder SHOW MY DATA functionality
             elif user_input == 7:
