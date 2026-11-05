@@ -44,11 +44,12 @@ def _show_top_borrowed_books(get_json_func) -> None:
     if not books:
         print("No borrowing history found.")
     else:
+        print(books)
         for index, book in enumerate(books, start=1):
             title = book.get("title", "Unknown")
             authors = book.get("authors") or []
             authors_str = ", ".join(authors) if authors else "Unknown Author"
-            count = book.get("borrow_count", 0)
+            count = book.get("loan_count", 0)
             print(f"{index}. {title}  by {authors_str} — borrowed {count} time(s)")
 
 
