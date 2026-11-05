@@ -160,10 +160,35 @@ def show_my_data(get_json_func, base_url):
         print("")
 
 
-def update_member_data():
-    print("\nUpdate member data:\n")
-    pass
+def edit_member(base_url):
+    print("\nUpdate, anonymize or delete member data:\n")
 
+
+    def update_member(base_url):
+        member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to update: ", "Member ID must be a valid integer.")
+
+        member_data = put.(f"{base_url}/members/{member_id}", 
+                            headers={"X-API-Key": login_service.api_key, 
+                                    "X-Card-Number": user_session.get_userdata().card_number})
+
+
+    while True:
+        user_input = input_handlers.get_int_range(
+            "1) Update member data\n2) Anonymize member data\n3) Delete member data\n0) Back to menu\n",
+            0, 3
+        )
+
+        if user_input == 1:
+            print("\nUpdate member data:")
+            update_member()
+        elif user_input == 2:
+            print("\nAnonymize member data:")
+            print("Test: Anonymize member data")
+            pass  # Implement anonymize logic here
+        elif user_input == 3:
+            print("\nDelete member data:")
+            print("Test: Delete member data")
+            pass  # Implement delete logic here
 
 
 def exit_program():
@@ -174,6 +199,9 @@ def exit_program():
 
 
 def admin_ui(post_json_func, base_url, api_key):
+
+    edit_member(base_url)  # DEBUG LINE: Remove this line when the edit_member function is fully implemented
+
     while True:
         user_input = input_handlers.get_int_range(
             ADMIN_MENU_TEXT,
