@@ -160,8 +160,8 @@ def show_my_data(get_json_func, base_url):
         print("")
 
 
-def edit_member(base_url):
-    print("\nUpdate, anonymize or delete member data:\n")
+def anonymize_member(base_url):
+    print("\nAnonymize member data:\n")
 
 
     def update_member(base_url):
@@ -172,24 +172,6 @@ def edit_member(base_url):
                                     "X-Card-Number": user_session.get_userdata().card_number})
 
 
-    while True:
-        user_input = input_handlers.get_int_range(
-            "1) Update member data\n2) Anonymize member data\n3) Delete member data\n0) Back to menu\n",
-            0, 3
-        )
-
-        if user_input == 1:
-            print("\nUpdate member data:")
-            update_member()
-        elif user_input == 2:
-            print("\nAnonymize member data:")
-            print("Test: Anonymize member data")
-            pass  # Implement anonymize logic here
-        elif user_input == 3:
-            print("\nDelete member data:")
-            print("Test: Delete member data")
-            pass  # Implement delete logic here
-
 
 def exit_program():
     # Shutdown sequence
@@ -198,9 +180,28 @@ def exit_program():
     exit()
 
 
+def edit_members_ui():    # If we have time we can implement this function to edit member data, anonymize member data and delete member data.
+        
+    while True:
+        user_input = input_handlers.get_int_range(
+            "1) Update member data\n2) Anonymize member data\n3) Delete member data\n0) Back to menu\n",
+            0, 3
+        )
+
+        if user_input == 1:
+            print("\nUpdate member data:")
+            pass  # Implement update logic here
+        elif user_input == 2:
+            print("\nAnonymize member data:")
+            pass  # Implement anonymize logic here
+        elif user_input == 3:
+            print("\nDelete member data:")
+            pass  # Implement delete logic here
+
+
 def admin_ui(post_json_func, base_url, api_key):
 
-    edit_member(base_url)  # DEBUG LINE: Remove this line when the edit_member function is fully implemented
+    anonymize_member(base_url)  # DEBUG LINE: Remove this line when the edit_member function is fully implemented
 
     while True:
         user_input = input_handlers.get_int_range(
