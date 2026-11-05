@@ -4,10 +4,8 @@ from typing import Annotated
 
 from fastapi import FastAPI, Query, HTTPException, Response, status
 
-from core import database
-from core import models
+from core import database, models, external_api
 from core.auth import CurrentMember, CurrentLibrarian
-from external_api import OpenLibraryError, search_books
 
 
 app = FastAPI(title="Book Club Library")
@@ -73,8 +71,8 @@ def import_book(
 
     # Query Open Library API
     try:
-        results = search_books(isbn=clean_isbn, limit=1)
-    except OpenLibraryError as error:
+        results = external_api.search_books(isbn=clean_isbn, limit=1)
+    except external_api.OpenLibraryError as error:
         raise HTTPException(status_code=502, detail=str(error))
 
     if not results:
