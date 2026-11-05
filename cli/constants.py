@@ -11,9 +11,6 @@ MAIN_MENU_TEXT_LIBRARIAN = (
     "4) Return book\n"
     "5) Statistics\n"
     "6) Show my data\n"
-    "7) PLACEHOLDER: Future functionality\n"
-    "8) PLACEHOLDER: Future functionality\n"
-    "9) PLACEHOLDER: Future functionality\n"
     "0) Exit program\n"
 )
 
@@ -22,11 +19,7 @@ MAIN_MENU_TEXT_MEMBER = (
     "2) Show books\n"
     "3) Borrow book\n"
     "4) Return book\n"
-    "5) Statistics\n"
-    "6) Show my data\n"
-    "7) PLACEHOLDER: Future functionality\n"
-    "8) PLACEHOLDER: Future functionality\n"
-    "9) PLACEHOLDER: Future functionality\n"
+    "5) Show my data\n"
     "0) Exit program\n"
 )
 
@@ -37,9 +30,5 @@ ADMIN_MENU_TEXT = (
     "3) Show member data\n"
     "4) Anonymize member\n"
     "5) Delete member\n"
-    "6) PLACEHOLDER: Future functionality\n"
-    "7) PLACEHOLDER: Future functionality\n"
-    "8) PLACEHOLDER: Future functionality\n"
-    "9) PLACEHOLDER: Future functionality\n"
     "0) Exit to main menu\n"
 )
