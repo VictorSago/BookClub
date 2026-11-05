@@ -1,6 +1,7 @@
 from cli.constants import ADMIN_MENU_TEXT
 from cli import input_handlers, user_session, login_service
 from cli.borrow_ui import borrow_book as borrow_book_cli
+import requests
 
 def show_books(get_json_func, base_url):
     print("\nShow books:\n\nYou can search books by Title, Author, Publishing year or any combination.")
@@ -163,7 +164,6 @@ def show_my_data(get_json_func, base_url):
 def anonymize_member(post_json_func, base_url, api_key):
     print("\nAnonymize member data:\n")
 
-
     member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to anonymize: ", "Member ID must be a valid integer.")
 
     response, response_code = post_json_func(f"{base_url}/members/{member_id}/anonymise",
@@ -175,6 +175,21 @@ def anonymize_member(post_json_func, base_url, api_key):
         print(f"Member anonymiziation of member {response['member_id']} successful")
 
     print("")
+
+
+def delete_member(base_url, api_key):
+    print("\nDelete member:\n")
+
+    member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to delete: ", "Member ID must be a valid integer.")
+
+    response, response_code = requests.delete(f"{base_url}/members/{member_id}",
+                              headers={"X-API-Key": api_key, 
+                                    "X-Card-Number": user_session.get_userdata().card_number})
+
+    print(response, response_code)
+
+    print("")
+
 
 
 
@@ -199,13 +214,14 @@ def edit_members_ui(post_json_func, base_url, api_key):    # If we have time we 
         elif user_input == 2:
             anonymize_member(post_json_func, base_url, api_key)
         elif user_input == 3:
-            print("\nDelete member data:")
-            pass  # Implement delete logic here
+            delete_member(base_url, api_key)
         elif user_input == 0:
             break
 
 
 def admin_ui(post_json_func, base_url, api_key):
+
+    edit_members_ui(post_json_func, base_url, api_key)
 
     while True:
         user_input = input_handlers.get_int_range(
