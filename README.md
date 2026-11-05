@@ -127,13 +127,14 @@ Explaining relationships and why it is in 3NF.
   + Librarians are identified by card: a list of librarians' cards is in the `.env` on the server.
 - Roles are not stored in the database but derived based on the `X-Card-Number` provided by the client. A `role` column is possible future work.
 
-## 7. Personal data (required section)
+## 7. Personal data
 
 - **Stored:** `name`, `email`, optional `phone`, `card_number` (a credential, not personal in itself), `joined_at`, and the loan history linked to the member.
 - For each column, why it is needed. **Not stored:** birth date and address, and say why.
 - A reading history can reveal a lot about a person.
 - `GET /me/data` shows everything held about one person.
-- `DELETE /me` anonymises: it overwrites `name`, `email`, `phone` and `card_number` and sets `anonymised_at`. The loan rows stay, and the README must explain why. **(the reason, such as statistics and overdue records)**
+- `DELETE /me`. If a regular member has no loan history, then this member can be removed completely. If they do have a loan history but no active loans, then `DELETE /me` overwrites `name`, `email`, `phone` and `card_number` and sets `anonymised_at`. The loan rows stay, so that statistics and overdue records aren't affected by anonymisation.
+- A librarian cannot delete/anonymise themselves: this would risk locking everyone out of the database, if there is only one librarian. But a librarian can be removed/anonymised by another librarian with `POST /members/{member_id}/anonymise` route.
 - (Possible future work: Removing inactive members. **decide: what "inactive" means)**
 - Seed data is fake (`example.com`), with no real people.
 
