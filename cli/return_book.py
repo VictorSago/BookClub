@@ -80,17 +80,23 @@ def return_book(card_number):
                 return
 
             # Update the loan through the backend's PATCH endpoint.
-            
-            # Update the loan through the backend's PATCH endpoint.
-            
-            response = requests.patch(
-            f"{BASE}/me/loans/{loan_id}/return",
-            headers=headers,
-            timeout=TIMEOUT,
+            response = requests.post(
+                f"{BASE}/me/loans/{loan_id}/return",
+                headers=headers,
+                timeout=TIMEOUT,
             )
 
-            response.raise_for_status()
+            if response.status_code >= 400:
+                try:
+                    err_detail = response.json().get("detail", "Unknown error")
+                except ValueError:
+                    err_detail = response.text
+
+                print(f"\nError: {err_detail}")
+                return
+
             returned_loan = response.json()
+
 
             print("\n===== BOOK RETURNED SUCCESSFULLY =====")
             print(f"Loan ID: {loan_id}")
