@@ -7,7 +7,6 @@ from cli.constants import DATE_FORMAT, DATE_FORMAT_DISPLAY
 
 def get_valid_text(
     prompt: str,
-    
     error_message: str = "Input cannot be empty. Please try again.",
     can_be_empty: bool = False,
 ) -> str:
