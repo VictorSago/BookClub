@@ -160,16 +160,21 @@ def show_my_data(get_json_func, base_url):
         print("")
 
 
-def anonymize_member(base_url):
+def anonymize_member(post_json_func, base_url, api_key):
     print("\nAnonymize member data:\n")
 
 
-    def update_member(base_url):
-        member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to update: ", "Member ID must be a valid integer.")
+    member_id = input_handlers.get_valid_int("Please type the member ID of the member you like to anonymize: ", "Member ID must be a valid integer.")
 
-        member_data = put.(f"{base_url}/members/{member_id}", 
-                            headers={"X-API-Key": login_service.api_key, 
+    response, response_code = post_json_func(f"{base_url}/members/{member_id}/anonymise",
+                              json_data=member_id,
+                              headers={"X-API-Key": api_key, 
                                     "X-Card-Number": user_session.get_userdata().card_number})
+
+    if response_code == 200:
+        print(f"Member anonymiziation of member {response['member_id']} successful")
+
+    print("")
 
 
 
@@ -180,7 +185,7 @@ def exit_program():
     exit()
 
 
-def edit_members_ui():    # If we have time we can implement this function to edit member data, anonymize member data and delete member data.
+def edit_members_ui(post_json_func, base_url, api_key):    # If we have time we can implement this function to edit member data, anonymize member data and delete member data.
         
     while True:
         user_input = input_handlers.get_int_range(
@@ -192,16 +197,15 @@ def edit_members_ui():    # If we have time we can implement this function to ed
             print("\nUpdate member data:")
             pass  # Implement update logic here
         elif user_input == 2:
-            print("\nAnonymize member data:")
-            pass  # Implement anonymize logic here
+            anonymize_member(post_json_func, base_url, api_key)
         elif user_input == 3:
             print("\nDelete member data:")
             pass  # Implement delete logic here
+        elif user_input == 0:
+            break
 
 
 def admin_ui(post_json_func, base_url, api_key):
-
-    anonymize_member(base_url)  # DEBUG LINE: Remove this line when the edit_member function is fully implemented
 
     while True:
         user_input = input_handlers.get_int_range(
