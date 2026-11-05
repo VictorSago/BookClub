@@ -119,8 +119,6 @@ def main():
             elif user_input == 4:
                 return_book()
             elif user_input == 5:
-                show_statistics_menu(get_json)
-            elif user_input == 6:
                 show_my_data(get_json)
             elif user_input == 0:
                 exit_program()

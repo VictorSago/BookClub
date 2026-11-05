@@ -19,8 +19,7 @@ MAIN_MENU_TEXT_MEMBER = (
     "2) Show books\n"
     "3) Borrow book\n"
     "4) Return book\n"
-    "5) Statistics\n"
-    "6) Show my data\n"
+    "5) Show my data\n"
     "0) Exit program\n"
 )
 
