@@ -11,7 +11,10 @@ import secrets
 from pathlib import Path
 from datetime import date, timedelta
 import sqlite3
-from core.database import DB_PATH, LOAN_DAYS, ANONYMISED_NAME, connect, new_card_number
+
+from core.database import DB_PATH, connect
+from core.db_members import ANONYMISED_NAME, new_card_number
+from core.db_loans import LOAN_DAYS
 
 
 BASE_DIR = Path(__file__).parent

@@ -9,20 +9,29 @@
 
 ### 1.1 Project Goal
 
-_Project goal and description_
+A simple library management system for small community libraries that enables members to self-manage book loans and returns while helping volunteer librarians maintain the catalog and member records with Open Library integration.
 
 ### 1.2 Project Structure
 
-_A short description of project organization_
+The project follows a modular structure separating the FastAPI backend, CLI client, database persistence, and external service integration:
+
+- main.py — FastAPI application entry point, route handlers, and dependency injection.
+- client.py — Terminal-based interactive client for members and librarians.
+- auth.py — Authentication and header validation (X-API-Key, X-Card-Number).
+- core/ — Database layer (schema.sql, database.py), seed script (seed.py), Pydantic models (models.py), and Open Library integration (external_api.py).
+- cli/ — Helpers, session management, and input processors for the console client.
+- docs/ — Sprint documentation, retrospectives, team reflection, and architectural diagrams.
 
 ```text
 BookClub/
 ├── main.py
 ├── client.py
-├── auth.py
 ├── core/
 │   ├── __init__.py
+│   ├── auth.py
 │   ├── database.py
+│   ├── db_members.py
+│   ├── db_loans.py
 │   ├── models.py
 │   ├── schema.sql
 │   ├── seed.py
@@ -31,13 +40,18 @@ BookClub/
 ├── cli/
 │   ├── constants.py
 │   ├── input_handlers.py
+│   ├── borrow_ui.py
+│   ├── ui_menu.py
+│   ├── return_book.py
+│   ├── stats_service.py
 │   ├── user_session.py
-│   └── ...other helpers
+│   └── login_service.py
 ├── docs/
 │   ├── api.md
 │   ├── daily.md
 │   ├── ER-diagram.png
-│   └── ...other documents
+│   ├── retro_sprint-1.md
+│   └── retro_sprint-2.md
 ├── .env.example
 ├── .gitignore
 ├── README.md
@@ -47,9 +61,9 @@ BookClub/
 
 ### 1.3 Other Documents
 
-_Explanations_ and _links_.
-
-[How to contribute](CONTRIBUTING.md)
+- [Contributing Guidelines](CONTRIBUTING.md) — Coding standards, git workflow, and Definition of Done.
+- [Project Board](https://github.com/users/VictorSago/projects/2) — GitHub Projects board with user stories and sprint progress.
+- [Documentation (`docs/`)](docs/) — Sprint logs (`daily.md`, `retro-sprint-1.md`, `retro-sprint-2.md`), team reflection (`reflection.md`), API reference, and the ER diagram.
 
 ## 2. Setup and running (required section)
 
