@@ -112,3 +112,24 @@ Tasks:
 - Victor: Statistics backend
 - Christofer: Review project pdf and discuss with Maryna, Anonymize and remove member UI functions
 - Maryna: Statistics client, Review project pdf and Discuss with Christofer.
+
+## 2026-11-05
+
+On yesterday:
+
+- Show one member, create member
+- We lost something during merge, fixed now
+- Statistics is ongoing, client side ready,
+- Refactoring was planned but we wont have time
+- Borrow books and return books is written but needs testing
+- Added edit members fuctions and API
+- Some restructure in core
+- Went through requirements
+
+Tasks:
+
+- All: review PRs. Big merge!
+- Mohana: Testing
+- Victor: Requrements, Some edits on backend, Readme if time
+- Christofer: Anonymize, remove and edit member UI functions
+- Maryna: Manage big merge, statistics
